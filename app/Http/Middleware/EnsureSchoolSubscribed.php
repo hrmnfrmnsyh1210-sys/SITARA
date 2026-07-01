@@ -23,7 +23,10 @@ class EnsureSchoolSubscribed
 
         $school = $user->school;
 
-        if (! $school || ! $school->hasActiveSubscription()) {
+        // Sekolah nonaktif = langganan sudah habis / belum ada, jadi semua guru &
+        // siswa di sekolah itu langsung kehilangan akses meski masih ada baris
+        // langganan aktif di database.
+        if (! $school || ! $school->is_active || ! $school->hasActiveSubscription()) {
             return redirect()->route('subscription.suspended');
         }
 
