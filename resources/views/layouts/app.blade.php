@@ -99,11 +99,24 @@
             @if (auth()->user()->isAdmin() && ! request()->routeIs('admin.subscription.*'))
                 @php
                     $subSchool = auth()->user()->school;
+                    $schoolInactive = $subSchool && ! $subSchool->is_active;
+                    $frozenDays = $schoolInactive && $subSchool->isFrozen() ? $subSchool->frozenRemainingDays() : null;
                     $subActive = $subSchool?->activeSubscription();
                     $subEnds = $subActive?->ends_at;
                     $subDaysLeft = $subEnds ? now()->startOfDay()->diffInDays($subEnds, false) : null;
                 @endphp
-                @if (! $subActive)
+                @if ($schoolInactive)
+                    <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-2" role="alert">
+                        <span>
+                            <i class="bi bi-shield-lock me-2"></i>Akun sekolah <strong>dinonaktifkan</strong> oleh administrator SITARA.
+                            Guru &amp; siswa tidak dapat mengakses sistem.
+                            @if ($frozenDays)
+                                Sisa masa langganan <strong>{{ $frozenDays }} hari</strong> dibekukan &amp; dilanjutkan saat diaktifkan kembali.
+                            @endif
+                            Silakan hubungi <strong>tim SITARA</strong> untuk mengaktifkan kembali.
+                        </span>
+                    </div>
+                @elseif (! $subActive)
                     <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-2" role="alert">
                         <span><i class="bi bi-exclamation-octagon me-2"></i>Langganan sekolah <strong>tidak aktif</strong>. Guru &amp; siswa belum bisa mengikuti ujian.</span>
                         <a href="{{ route('admin.subscription.index') }}" class="btn btn-sm btn-danger">Perpanjang Sekarang</a>
