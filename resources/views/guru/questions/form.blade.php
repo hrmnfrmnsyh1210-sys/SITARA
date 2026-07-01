@@ -29,7 +29,7 @@
                 </div>
                 <div class="mb-3"><label class="form-label">Pertanyaan <span class="text-danger">*</span></label><textarea name="question_text" rows="3" class="form-control" required>{{ old('question_text',$question->question_text) }}</textarea></div>
                 <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Gambar (opsional)</label><input type="file" name="image" class="form-control" accept="image/*">@if($question->image)<img src="{{ asset('storage/'.$question->image) }}" class="mt-2 rounded" style="height:60px">@endif</div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Gambar (opsional)</label><input type="file" name="image" class="form-control" accept="image/*">@if($question->image)<img src="{{ \Illuminate\Support\Facades\Storage::url($question->image) }}" class="mt-2 rounded" style="height:60px">@endif</div>
                     <div class="col-md-6 mb-3"><label class="form-label">Audio (opsional)</label><input type="file" name="audio" class="form-control" accept="audio/*"></div>
                 </div>
 

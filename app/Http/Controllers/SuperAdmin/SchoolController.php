@@ -79,9 +79,9 @@ class SchoolController extends Controller
         $request->validate(['logo' => ['nullable', 'image', 'max:2048']]);
         if ($request->hasFile('logo')) {
             if ($school?->logo) {
-                Storage::disk('public')->delete($school->logo);
+                Storage::delete($school->logo);
             }
-            return $request->file('logo')->store('logos', 'public');
+            return $request->file('logo')->store('logos');
         }
         return null;
     }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
 {
@@ -41,7 +42,7 @@ class Student extends Model
     public function getPhotoUrlAttribute(): string
     {
         return $this->photo
-            ? asset('storage/' . $this->photo)
+            ? Storage::url($this->photo)
             : 'https://ui-avatars.com/api/?background=2563EB&color=fff&name=' . urlencode($this->name);
     }
 }

@@ -60,7 +60,7 @@
                         <td><small>{{ $sub->payment_method ?? '-' }}</small>@if($sub->note)<br><small class="text-muted">{{ $sub->note }}</small>@endif</td>
                         <td>
                             @if ($sub->payment_proof)
-                                <a href="{{ asset('storage/' . $sub->payment_proof) }}" target="_blank" class="btn btn-sm btn-light"><i class="bi bi-image"></i></a>
+                                <a href="{{ \Illuminate\Support\Facades\Storage::url($sub->payment_proof) }}" target="_blank" class="btn btn-sm btn-light"><i class="bi bi-image"></i></a>
                             @else <span class="text-muted">—</span> @endif
                         </td>
                         <td class="text-end text-nowrap">

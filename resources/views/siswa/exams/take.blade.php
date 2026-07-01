@@ -40,8 +40,8 @@
                         </div>
 
                         <div class="fs-5 mb-3">{!! nl2br(e($q->question_text)) !!}</div>
-                        @if($q->image)<img src="{{ asset('storage/'.$q->image) }}" class="img-fluid rounded mb-3" style="max-height:280px">@endif
-                        @if($q->audio)<audio controls class="mb-3 w-100"><source src="{{ asset('storage/'.$q->audio) }}"></audio>@endif
+                        @if($q->image)<img src="{{ \Illuminate\Support\Facades\Storage::url($q->image) }}" class="img-fluid rounded mb-3" style="max-height:280px">@endif
+                        @if($q->audio)<audio controls class="mb-3 w-100"><source src="{{ \Illuminate\Support\Facades\Storage::url($q->audio) }}"></audio>@endif
 
                         @if(in_array($q->type,['multiple_choice','true_false']))
                             <div class="d-grid gap-2">

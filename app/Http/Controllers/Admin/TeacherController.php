@@ -59,7 +59,7 @@ class TeacherController extends Controller
                 'gender' => $data['gender'] ?? null,
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
-                'photo' => $request->hasFile('photo') ? $request->file('photo')->store('photos', 'public') : null,
+                'photo' => $request->hasFile('photo') ? $request->file('photo')->store('photos') : null,
             ]);
         });
 
@@ -98,9 +98,9 @@ class TeacherController extends Controller
 
             if ($request->hasFile('photo')) {
                 if ($teacher->photo) {
-                    Storage::disk('public')->delete($teacher->photo);
+                    Storage::delete($teacher->photo);
                 }
-                $data['photo'] = $request->file('photo')->store('photos', 'public');
+                $data['photo'] = $request->file('photo')->store('photos');
             } else {
                 unset($data['photo']);
             }

@@ -13,7 +13,7 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# public/build sengaja di-commit: hosting produksi tanpa Node.js jadi asset di-build lokal
 /public/hot
 /public/storage
 /storage/*.key

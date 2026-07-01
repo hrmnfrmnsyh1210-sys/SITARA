@@ -220,15 +220,15 @@ class QuestionController extends Controller
 
         if ($request->hasFile('image')) {
             if ($question?->image) {
-                Storage::disk('public')->delete($question->image);
+                Storage::delete($question->image);
             }
-            $payload['image'] = $request->file('image')->store('questions', 'public');
+            $payload['image'] = $request->file('image')->store('questions');
         }
         if ($request->hasFile('audio')) {
             if ($question?->audio) {
-                Storage::disk('public')->delete($question->audio);
+                Storage::delete($question->audio);
             }
-            $payload['audio'] = $request->file('audio')->store('questions', 'public');
+            $payload['audio'] = $request->file('audio')->store('questions');
         }
 
         return $payload;

@@ -57,7 +57,7 @@ class SubscriptionController extends Controller
         $subscription->school_id = $school->id;
 
         if ($request->hasFile('payment_proof')) {
-            $subscription->payment_proof = $request->file('payment_proof')->store('subscription-proofs', 'public');
+            $subscription->payment_proof = $request->file('payment_proof')->store('subscription-proofs');
         }
 
         $subscription->save();
@@ -72,7 +72,7 @@ class SubscriptionController extends Controller
         abort_unless($subscription->status === Subscription::STATUS_PENDING, 422);
 
         if ($subscription->payment_proof) {
-            Storage::disk('public')->delete($subscription->payment_proof);
+            Storage::delete($subscription->payment_proof);
         }
         $subscription->delete();
 

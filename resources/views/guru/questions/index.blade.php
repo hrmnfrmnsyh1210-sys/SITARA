@@ -38,7 +38,7 @@
                 </div>
             </div>
             <div class="fw-semibold mb-1">{{ $questions->firstItem() + $i }}. {!! nl2br(e(Str::limit($q->question_text, 200))) !!}</div>
-            @if($q->image)<img src="{{ asset('storage/'.$q->image) }}" class="rounded mb-2" style="max-height:120px">@endif
+            @if($q->image)<img src="{{ \Illuminate\Support\Facades\Storage::url($q->image) }}" class="rounded mb-2" style="max-height:120px">@endif
             @if(in_array($q->type,['multiple_choice','true_false']) && $q->options)
                 <div class="row g-1 small">
                     @foreach($q->options as $opt)
