@@ -1,0 +1,12 @@
+# Arahkan semua request ke folder /public (Laravel) — dipakai saat document root
+# hosting menunjuk ke root project, bukan ke /public.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Lindungi file sensitif
+<FilesMatch "^\.(env|git)">
+    Require all denied
+</FilesMatch>
