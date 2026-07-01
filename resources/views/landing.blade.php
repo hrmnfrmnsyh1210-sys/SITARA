@@ -25,7 +25,7 @@
         .navbar-hero.scrolled { background: var(--hero-blue); box-shadow: 0 8px 30px rgba(8,30,70,.25); padding-top: .6rem; padding-bottom: .6rem; }
 
         /* ---- Hero ---- */
-        .hero { position: relative; overflow: hidden; background: var(--hero-blue); color: #fff; padding: 9rem 0 6rem; }
+        .hero { position: relative; overflow: hidden; background: var(--hero-blue); color: #fff; padding: 6rem 0 6rem; }
         .hero .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: .85rem; color: rgba(255,255,255,.85); }
         .hero .eyebrow b { color: var(--hero-mint); }
         .hero h1 { font-weight: 800; font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -.02em; }
@@ -68,7 +68,7 @@
         .navbar-hero .navbar-toggler i { line-height: 1; }
 
         @media (max-width: 991.98px) {
-            .hero { padding: 7rem 0 4rem; text-align: center; }
+            .hero { padding: 5rem 0 4rem; text-align: center; }
             .hero .lead-text { margin-inline: auto; }
             .hero-blob { display: none; }
 
