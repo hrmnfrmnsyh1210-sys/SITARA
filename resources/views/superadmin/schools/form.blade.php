@@ -1,6 +1,13 @@
 @extends('layouts.app')
 @section('title', $school->exists ? 'Edit Sekolah' : 'Tambah Sekolah')
 
+@php
+    // Sekolah ini masih punya langganan aktif (sudah dibayar)? Dipakai untuk
+    // memperingatkan super admin sebelum menonaktifkannya.
+    $hasActiveSub = $school->exists && $school->hasActiveSubscription();
+    $subEndsAt = optional($school->subscriptionEndsAt())->translatedFormat('d M Y');
+@endphp
+
 @section('content')
 <div class="d-flex align-items-center gap-2 mb-3">
     <a href="{{ route('superadmin.schools.index') }}" class="btn btn-light"><i class="bi bi-arrow-left"></i></a>
@@ -11,7 +18,8 @@
 
 <div class="card" data-aos="fade-up">
     <div class="card-body p-4">
-        <form method="POST" action="{{ $school->exists ? route('superadmin.schools.update',$school) : route('superadmin.schools.store') }}" enctype="multipart/form-data">
+        <form id="schoolForm" method="POST" action="{{ $school->exists ? route('superadmin.schools.update',$school) : route('superadmin.schools.store') }}" enctype="multipart/form-data"
+              data-has-active-sub="{{ $hasActiveSub ? '1' : '0' }}" data-sub-ends="{{ $subEndsAt ?? '' }}" data-school-name="{{ $school->name }}">
             @csrf
             @if($school->exists) @method('PUT') @endif
             <div class="row g-3">
@@ -37,4 +45,59 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var form = document.getElementById('schoolForm');
+    if (!form || form.dataset.hasActiveSub !== '1') return;
+
+    var toggle = document.getElementById('active');
+
+    form.addEventListener('submit', function (e) {
+        // Hanya peringatkan bila super admin MENONAKTIFKAN sekolah yang masih berlangganan.
+        if (!toggle || toggle.checked || form.dataset.confirmedDeactivate === '1') return;
+
+        e.preventDefault();
+
+        var name = form.dataset.schoolName || 'sekolah ini';
+        var ends = form.dataset.subEnds;
+        var info = ends
+            ? 'Langganan <strong>' + name + '</strong> masih aktif sampai <strong>' + ends + '</strong>.'
+            : 'Sekolah <strong>' + name + '</strong> masih memiliki langganan aktif.';
+
+        var proceed = function () { form.dataset.confirmedDeactivate = '1'; form.submit(); };
+
+        if (typeof Swal === 'undefined') {
+            if (window.confirm('Sekolah ini masih berlangganan aktif. Menonaktifkan akan langsung memblokir semua guru & siswa. Lanjutkan?')) proceed();
+            return;
+        }
+
+        var dark = document.body.classList.contains('dark-mode');
+        Swal.fire({
+            title: 'Nonaktifkan sekolah berlangganan?',
+            html: '<p class="sitara-swal-text">' + info +
+                  ' Menonaktifkan akun akan <strong>langsung memblokir semua guru &amp; siswa</strong>. Sisa masa langganan akan <strong>dibekukan</strong> dan dilanjutkan kembali saat sekolah diaktifkan.</p>',
+            imageUrl: (window.SITARA_SWAL || {}).deleteImage,
+            imageWidth: 120,
+            imageAlt: 'SITARA',
+            showCancelButton: true,
+            reverseButtons: true,
+            buttonsStyling: false,
+            focusCancel: true,
+            confirmButtonText: 'Ya, nonaktifkan',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'sitara-swal' + (dark ? ' sitara-swal-dark' : ''),
+                title: 'sitara-swal-title',
+                image: 'sitara-swal-img',
+                actions: 'sitara-swal-actions',
+                confirmButton: 'sitara-swal-btn sitara-swal-btn-danger',
+                cancelButton: 'sitara-swal-btn sitara-swal-btn-cancel'
+            }
+        }).then(function (r) { if (r.isConfirmed) proceed(); });
+    });
+})();
+</script>
+@endpush
 @endsection

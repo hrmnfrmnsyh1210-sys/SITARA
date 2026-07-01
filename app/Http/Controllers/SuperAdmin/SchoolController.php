@@ -46,7 +46,16 @@ class SchoolController extends Controller
         if ($logo = $this->handleLogo($request, $school)) {
             $data['logo'] = $logo;
         }
+
+        $wasActive = $school->is_active;
         $school->update($data);
+
+        // Nonaktif -> bekukan sisa langganan; Aktif kembali -> lanjutkan sisa hari.
+        if ($wasActive && ! $school->is_active) {
+            $school->freezeSubscription();
+        } elseif (! $wasActive && $school->is_active) {
+            $school->thawSubscription();
+        }
 
         return redirect()->route('superadmin.schools.index')->with('success', 'Sekolah berhasil diperbarui.');
     }

@@ -1,6 +1,14 @@
 @extends('layouts.app')
 @section('title', 'Akses Ditangguhkan')
 
+@php
+    $school = auth()->user()->school;
+    // Sekolah dinonaktifkan manual oleh super admin PADAHAL langganannya masih
+    // berlaku (sudah dibayar) — sisa harinya dibekukan. Konteks berbeda dari
+    // "langganan habis", jadi pesannya pun berbeda.
+    $manualSuspend = $school && ! $school->is_active && $school->isFrozen();
+@endphp
+
 @section('content')
 <style>
     .suspend-hero {
@@ -88,6 +96,41 @@
 
                     {{-- Pesan --}}
                     <div class="col-md-7 text-white text-center text-md-start order-md-1">
+                    @if ($manualSuspend)
+                        {{-- Sekolah dinonaktifkan manual, langganan masih berbayar --}}
+                        <span class="badge rounded-pill mb-3"
+                              style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:.5rem .9rem;font-weight:500">
+                            <i class="bi bi-shield-lock me-1"></i> Akun Dinonaktifkan Sementara
+                        </span>
+
+                        <h1 class="fw-bold mb-2" style="font-size:1.9rem;line-height:1.2">
+                            Akun sekolah sedang dijeda sementara
+                        </h1>
+
+                        <p class="opacity-90 mb-4" style="max-width:36rem">
+                            Akun <strong>{{ $school->name }}</strong> untuk sementara dinonaktifkan oleh
+                            <strong>administrator SITARA</strong>. Langganan Anda masih tercatat aktif —
+                            silakan hubungi tim SITARA agar akses dapat diaktifkan kembali.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+                            <a href="{{ route(auth()->user()->dashboardRoute()) }}" class="btn btn-glow px-4">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Coba Lagi
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="btn btn-ghost-light px-4">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                                </button>
+                            </form>
+                        </div>
+
+                        <p class="small opacity-75 mt-4 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Butuh bantuan? Hubungi <strong>tim SITARA</strong> untuk mengaktifkan kembali akun sekolah Anda.
+                        </p>
+                    @else
+                        {{-- Langganan benar-benar habis / belum ada --}}
                         <span class="badge rounded-pill mb-3"
                               style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:.5rem .9rem;font-weight:500">
                             <i class="bi bi-hourglass-split me-1"></i> Langganan Belum Aktif
@@ -98,7 +141,7 @@
                         </h1>
 
                         <p class="opacity-90 mb-4" style="max-width:36rem">
-                            Langganan <strong>{{ auth()->user()->school->name ?? 'sekolah Anda' }}</strong>
+                            Langganan <strong>{{ $school->name ?? 'sekolah Anda' }}</strong>
                             sedang tidak aktif, jadi fitur ujian dijeda sementara. Aktifkan kembali
                             langganan untuk membuka semua yang sudah menanti di dalam SITARA.
                         </p>
@@ -135,6 +178,7 @@
                             <i class="bi bi-info-circle me-1"></i>
                             Butuh bantuan? Hubungi <strong>admin / operator sekolah</strong> Anda untuk memperpanjang langganan.
                         </p>
+                    @endif
                     </div>
                 </div>
             </div>

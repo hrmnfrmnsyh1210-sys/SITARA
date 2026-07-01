@@ -39,7 +39,10 @@
                         <td>{{ $school->npsn ?? '-' }}</td>
                         <td>{{ $school->teachers_count }}</td>
                         <td>{{ $school->students_count }}</td>
-                        <td><span class="badge bg-soft-{{ $school->is_active ? 'success':'danger' }}">{{ $school->is_active ? 'Aktif':'Nonaktif' }}</span></td>
+                        <td>
+                            <span class="badge bg-soft-{{ $school->is_active ? 'success':'danger' }}">{{ $school->is_active ? 'Aktif':'Nonaktif' }}</span>
+                            @if($school->isFrozen())<span class="badge bg-soft-info" title="Sisa masa langganan dibekukan"><i class="bi bi-snow me-1"></i>Beku</span>@endif
+                        </td>
                         <td class="text-end">
                             <a href="{{ route('superadmin.schools.edit', $school) }}" class="btn btn-sm btn-light"><i class="bi bi-pencil"></i></a>
                             <form action="{{ route('superadmin.schools.destroy', $school) }}" method="POST" class="d-inline" data-confirm="delete" data-confirm-text="Semua data terkait sekolah ini akan ikut terhapus dan tidak dapat dikembalikan.">
