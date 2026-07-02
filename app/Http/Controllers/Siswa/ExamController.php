@@ -166,6 +166,20 @@ class ExamController extends Controller
         return response()->json(['ok' => true, 'answered' => $answer->answer !== null, 'flagged' => $answer->is_flagged]);
     }
 
+    public function recordViolation(ExamSchedule $schedule)
+    {
+        $student = $this->student();
+        $result = ExamResult::where('exam_schedule_id', $schedule->id)
+            ->where('student_id', $student->id)->firstOrFail();
+
+        // Only count while the exam is still running.
+        if ($result->status === 'in_progress') {
+            $result->increment('violation_count');
+        }
+
+        return response()->json(['ok' => true, 'violations' => $result->violation_count]);
+    }
+
     public function submit(ExamSchedule $schedule)
     {
         $student = $this->student();

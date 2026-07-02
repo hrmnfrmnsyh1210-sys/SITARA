@@ -235,7 +235,19 @@ body.dark-mode { background: #060f1f; color: #cbd5e1; }
 body.dark-mode .navbar-top { background: rgba(15,23,42,.85); border-color: #1f2937; }
 body.dark-mode .card { background: #0f1b2e; color: #e5e7eb; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 body.dark-mode .content-area { color: #cbd5e1; }
-body.dark-mode .table { color: #cbd5e1; }
+body.dark-mode .table {
+    color: #cbd5e1;
+    --bs-table-bg: transparent;
+    --bs-table-color: #cbd5e1;
+    --bs-table-border-color: #1f2937;
+    --bs-table-striped-bg: rgba(255,255,255,.03);
+    --bs-table-striped-color: #cbd5e1;
+    --bs-table-hover-bg: rgba(20,184,166,.08);
+    --bs-table-hover-color: #e5e7eb;
+    --bs-table-active-bg: rgba(20,184,166,.12);
+    border-color: #1f2937;
+}
+body.dark-mode .table > :not(caption) > * > * { border-bottom-color: #1f2937; }
 body.dark-mode .table thead th { color: #94a3b8; border-color: #1f2937; }
 body.dark-mode .table tbody tr:hover { background: rgba(20,184,166,.08); }
 body.dark-mode .stat-card .stat-label { color: #94a3b8; }

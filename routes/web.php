@@ -133,6 +133,7 @@ Route::middleware(['auth', 'role:siswa', 'subscribed'])->prefix('siswa')->name('
     Route::post('/exams/{schedule}/start', [Siswa\ExamController::class, 'start'])->name('exams.start');
     Route::get('/exams/{schedule}/take', [Siswa\ExamController::class, 'take'])->name('exams.take');
     Route::post('/exams/{schedule}/answer', [Siswa\ExamController::class, 'saveAnswer'])->name('exams.answer');
+    Route::post('/exams/{schedule}/violation', [Siswa\ExamController::class, 'recordViolation'])->name('exams.violation');
     Route::post('/exams/{schedule}/submit', [Siswa\ExamController::class, 'submit'])->name('exams.submit');
     Route::get('/results', [Siswa\ResultController::class, 'index'])->name('results.index');
     Route::get('/results/{result}', [Siswa\ResultController::class, 'show'])->name('results.show');

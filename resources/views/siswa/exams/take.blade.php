@@ -197,8 +197,10 @@
 const EXAM_MASCOT = "{{ asset('assets/maskot2.png') }}";
 const CSRF = document.querySelector('meta[name=csrf-token]').content;
 const SAVE_URL = "{{ route('siswa.exams.answer', $schedule) }}";
+const VIOLATION_URL = "{{ route('siswa.exams.violation', $schedule) }}";
 const TOTAL = {{ count($ordered) }};
 const STUDENT = @json(auth()->user()->name);
+const MAX_VIOLATIONS = 3;   // keluar halaman sebanyak ini → ujian otomatis dikumpulkan
 let current = 0;
 let remaining = Math.floor({{ $remaining }}); // floor: avoid fractional seconds in the timer
 
@@ -335,31 +337,61 @@ function toggleFullscreen() {
    Anti-cheat: detect leaving the exam page + sound warning
    ============================================================ */
 // --- Warning sound: the school's own audio file, looped while away ---
+// Routed through the Web Audio API so we can (a) amplify above the system
+// volume and (b) improve the odds of playing through iOS's silent switch,
+// which plain <audio> elements normally respect.
 const warnAudio = new Audio("{{ asset('assets/warning.mp3') }}");
 warnAudio.loop = true;      // keep playing until the student comes back
 warnAudio.preload = 'auto';
-let audioPrimed = false;
-// Browsers block audio until a user gesture — unlock it silently on first interaction.
+warnAudio.volume = 1;
+
+// Escalating loudness: gentle at first (a brief accidental switch shouldn't
+// disturb the room), then rises the longer the student stays away.
+const WARN_GAIN_START = 0.8;   // soft opening level
+const WARN_GAIN_MAX   = 2.0;   // ceiling — audible even at low volume, not blaring
+const WARN_RAMP_SEC   = 7;     // seconds to climb from start to max
+let actx = null, warnGain = null, audioPrimed = false;
+
+// Browsers block audio until a user gesture — unlock & wire the graph on first interaction.
 function primeAudio() {
     if (audioPrimed) return;
-    audioPrimed = true;
-    warnAudio.muted = true;
-    warnAudio.play().then(() => {
-        warnAudio.pause(); warnAudio.currentTime = 0; warnAudio.muted = false;
-    }).catch(() => { warnAudio.muted = false; audioPrimed = false; });
+    try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = actx.createMediaElementSource(warnAudio);
+        warnGain = actx.createGain();
+        warnGain.gain.value = WARN_GAIN_START;
+        src.connect(warnGain); warnGain.connect(actx.destination);
+        audioPrimed = true;
+    } catch (e) { audioPrimed = false; }
+    if (actx && actx.state === 'suspended') actx.resume();
 }
 document.addEventListener('click', primeAudio);
 document.addEventListener('keydown', primeAudio);
 
-function playWarning() { try { warnAudio.currentTime = 0; warnAudio.play().catch(() => {}); } catch (e) {} }
-function stopWarning() { try { warnAudio.pause(); warnAudio.currentTime = 0; } catch (e) {} }
+function playWarning() {
+    if (actx && actx.state === 'suspended') actx.resume();   // resume in case it was suspended
+    if (warnGain && actx) {
+        const t = actx.currentTime;
+        warnGain.gain.cancelScheduledValues(t);
+        warnGain.gain.setValueAtTime(WARN_GAIN_START, t);
+        warnGain.gain.linearRampToValueAtTime(WARN_GAIN_MAX, t + WARN_RAMP_SEC);
+    }
+    try { warnAudio.currentTime = 0; warnAudio.play().catch(() => {}); } catch (e) {}
+}
+function stopWarning() {
+    try {
+        if (warnGain && actx) { warnGain.gain.cancelScheduledValues(actx.currentTime); warnGain.gain.value = WARN_GAIN_START; }
+        warnAudio.pause(); warnAudio.currentTime = 0;
+    } catch (e) {}
+}
 
 function flashScreen() {
     const f = document.getElementById('cheatFlash');
     f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
 }
 
-let violations = 0, isAway = false;
+let violations = {{ (int) ($result->violation_count ?? 0) }};   // resume the count across refreshes
+let isAway = false;
 function leftExam() {
     if (isAway) return;              // debounce blur + visibilitychange firing together
     isAway = true;
@@ -369,19 +401,43 @@ function returnedToExam() {
     if (!isAway) return;
     isAway = false;
     stopWarning();
-    violations++;
-    Swal.fire({
-        title: 'Kamu keluar dari halaman ujian!',
-        html: '<p class="sitara-swal-text">Aktivitas ini <b>tercatat</b> oleh sistem sebagai <b>pelanggaran ke-' + violations + '</b>.<br>' +
-              'Tetaplah di halaman ujian dan kerjakan dengan <b>jujur</b> — <b>jangan mencontek</b> ya! 🙏</p>',
+    // record the violation on the server (authoritative count), then react
+    fetch(VIOLATION_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'},
+        body: '{}'
+    }).then(r => r.json())
+      .then(d => { violations = (d && typeof d.violations === 'number') ? d.violations : violations + 1; showViolationModal(); })
+      .catch(() => { violations++; showViolationModal(); });
+}
+function showViolationModal() {
+    const swalBase = {
         imageUrl: EXAM_MASCOT, imageWidth: 130, imageAlt: 'SITARA',
         allowOutsideClick: false, allowEscapeKey: false, buttonsStyling: false,
-        confirmButtonText: 'Saya mengerti, lanjut jujur',
         customClass: {
             popup: 'sitara-swal', title: 'sitara-swal-title', image: 'sitara-swal-img',
             actions: 'sitara-swal-actions',
             confirmButton: 'sitara-swal-btn sitara-swal-btn-danger'
         }
+    };
+    // limit reached → force submit
+    if (violations >= MAX_VIOLATIONS) {
+        Swal.fire({ ...swalBase,
+            title: 'Batas pelanggaran tercapai!',
+            html: '<p class="sitara-swal-text">Kamu telah keluar dari halaman ujian sebanyak <b>' + violations + ' kali</b>.<br>' +
+                  'Sesuai aturan, ujianmu akan <b>otomatis dikumpulkan</b> sekarang.</p>',
+            confirmButtonText: 'Kumpulkan sekarang'
+        }).then(doSubmit);
+        setTimeout(doSubmit, 5000);   // fail-safe submit even if the button isn't tapped
+        return;
+    }
+    const left = Math.max(MAX_VIOLATIONS - violations, 0);
+    Swal.fire({ ...swalBase,
+        title: 'Kamu keluar dari halaman ujian!',
+        html: '<p class="sitara-swal-text">Aktivitas ini <b>tercatat</b> oleh sistem (<b>pelanggaran ke-' + violations + '</b>).<br>' +
+              'Sisa kesempatan: <b>' + left + '</b> lagi sebelum ujian <b>otomatis dikumpulkan</b>.<br>' +
+              'Tetaplah di halaman ujian dan kerjakan dengan <b>jujur</b> — <b>jangan mencontek</b> ya! 🙏</p>',
+        confirmButtonText: 'Saya mengerti, lanjut jujur'
     });
 }
 // tab switch / minimize
@@ -398,8 +454,9 @@ window.addEventListener('load', () => {
     Swal.fire({
         title: 'Semangat, ' + STUDENT + '! 🦉',
         html: '<p class="sitara-swal-text">Kerjakan dengan tenang, teliti, dan <b>jujur</b>.<br>' +
-              'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau &amp; mencatat</b> aktivitasmu, ' +
-              'dan akan berbunyi peringatan bila kamu keluar.<br><br><b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
+              'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau &amp; mencatat</b> aktivitasmu ' +
+              'dan akan <b>berbunyi peringatan</b> bila kamu keluar. Keluar sebanyak <b>' + MAX_VIOLATIONS + ' kali</b> ' +
+              'membuat ujian <b>otomatis dikumpulkan</b>.<br><br><b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
         imageUrl: EXAM_MASCOT, imageWidth: 150, imageAlt: 'SITARA',
         allowOutsideClick: false, buttonsStyling: false,
         confirmButtonText: 'Siap, mulai ujian!',

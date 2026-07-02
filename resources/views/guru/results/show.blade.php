@@ -13,7 +13,14 @@
         <div class="col"><div class="text-muted small">Benar</div><div class="fs-3 fw-bold text-success">{{ $result->correct_count }}</div></div>
         <div class="col"><div class="text-muted small">Salah</div><div class="fs-3 fw-bold text-danger">{{ $result->wrong_count }}</div></div>
         <div class="col"><div class="text-muted small">Status</div><div class="fs-5 fw-bold">{{ $result->is_passed?'Lulus':'Tidak Lulus' }}</div></div>
+        <div class="col">
+            <div class="text-muted small">Pelanggaran</div>
+            <div class="fs-3 fw-bold {{ ($result->violation_count ?? 0) > 0 ? 'text-danger' : 'text-muted' }}">{{ $result->violation_count ?? 0 }}×</div>
+        </div>
     </div>
+    @if(($result->violation_count ?? 0) > 0)
+        <div class="alert alert-warning mt-3 mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i>Siswa terdeteksi <b>keluar dari halaman ujian {{ $result->violation_count }} kali</b> (indikasi kemungkinan mencontek).</div>
+    @endif
 </div></div>
 
 <form method="POST" action="{{ route('guru.results.grade',$result) }}">

@@ -14,7 +14,7 @@ class ExamResult extends Model
     protected $fillable = [
         'exam_schedule_id', 'student_id', 'started_at', 'submitted_at', 'status',
         'total_score', 'correct_count', 'wrong_count', 'empty_count', 'is_passed',
-        'question_order', 'remaining_seconds', 'ip_address',
+        'question_order', 'remaining_seconds', 'ip_address', 'violation_count',
     ];
 
     protected $casts = [

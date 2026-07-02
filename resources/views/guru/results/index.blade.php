@@ -14,7 +14,7 @@
         @endif
     </form>
     <div class="table-responsive"><table class="table align-middle">
-        <thead><tr><th>Siswa</th><th>Ujian</th><th>Dikumpulkan</th><th class="text-center">Nilai</th><th class="text-center">Status</th><th class="text-end">Aksi</th></tr></thead>
+        <thead><tr><th>Siswa</th><th>Ujian</th><th>Dikumpulkan</th><th class="text-center">Nilai</th><th class="text-center">Pelanggaran</th><th class="text-center">Status</th><th class="text-end">Aksi</th></tr></thead>
         <tbody>
         @forelse($results as $r)
             <tr>
@@ -23,13 +23,20 @@
                 <td><small>{{ $r->submitted_at?->format('d M H:i') ?? '-' }}</small></td>
                 <td class="text-center fw-bold">{{ $r->total_score }}</td>
                 <td class="text-center">
+                    @if(($r->violation_count ?? 0) > 0)
+                        <span class="badge bg-soft-danger" title="Kali keluar dari halaman ujian"><i class="bi bi-exclamation-triangle me-1"></i>{{ $r->violation_count }}×</span>
+                    @else
+                        <span class="text-muted">—</span>
+                    @endif
+                </td>
+                <td class="text-center">
                     @if($r->status==='graded')<span class="badge bg-soft-success">Selesai</span>
                     @else<span class="badge bg-soft-warning">Perlu Koreksi</span>@endif
                 </td>
                 <td class="text-end"><a href="{{ route('guru.results.show',$r) }}" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1"></i>Periksa</a></td>
             </tr>
         @empty
-            <tr><td colspan="6" class="text-center text-muted py-5">Belum ada hasil ujian.</td></tr>
+            <tr><td colspan="7" class="text-center text-muted py-5">Belum ada hasil ujian.</td></tr>
         @endforelse
         </tbody>
     </table></div>
