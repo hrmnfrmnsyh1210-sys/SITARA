@@ -119,7 +119,8 @@ class ExamController extends Controller
         $answers = $result->answers()->get()->keyBy('question_id');
 
         // Compute live remaining time based on started_at + duration.
-        $elapsed = now()->diffInSeconds($result->started_at);
+        // Carbon 3's diffInSeconds() returns a float — cast to int so the timer never shows fractional seconds.
+        $elapsed = (int) now()->diffInSeconds($result->started_at);
         $remaining = max(($exam->duration_minutes * 60) - $elapsed, 0);
 
         if ($remaining <= 0) {

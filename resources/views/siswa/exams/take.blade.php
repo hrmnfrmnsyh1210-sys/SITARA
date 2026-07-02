@@ -11,16 +11,80 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
-    <style>body{background:#eef2f7}.exam-topbar{background:#fff;border-bottom:1px solid #e5e9f0;position:sticky;top:0;z-index:50}</style>
+    <style>
+        body{background:#eef2f7}
+        html,body{overflow-x:hidden;max-width:100%}
+        .exam-topbar{background:#fff;border-bottom:1px solid #e5e9f0;position:sticky;top:0;z-index:50}
+        .exam-title{min-width:0;flex:1}
+        .exam-title .fw-bold{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .exam-actions{flex-shrink:0}
+        /* tabular numerals keep the countdown from jumping width digit-to-digit */
+        .cbt-timer{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+        @media (max-width: 575.98px){
+            .exam-topbar .container-fluid{padding-left:.85rem!important;padding-right:.85rem!important;gap:.5rem}
+            .exam-title .fw-bold{font-size:.92rem}
+            .exam-title small{font-size:.7rem}
+            .exam-actions{gap:.4rem!important}
+            .exam-actions .badge{font-size:.9rem!important;padding:.4rem .55rem!important}
+            .exam-actions .btn{padding:.4rem .55rem}
+            .exam-actions .btn-primary .btn-label{display:none} /* hide "Selesai" label, keep icon */
+            .exam-actions .btn-primary .bi{margin:0!important}
+            .container-fluid.px-4{padding-left:.85rem!important;padding-right:.85rem!important}
+            .card-body.p-4{padding:1rem!important}
+            .question-pane .fs-5{font-size:1.05rem!important}
+            .option-card{padding:.75rem!important}
+        }
+
+        /* ---------- Enjoy: animations & polish ---------- */
+        /* soft slide-in each time a question is shown */
+        @keyframes sitara-q-in{ from{opacity:0; transform:translateY(16px) scale(.99);} to{opacity:1; transform:translateY(0) scale(1);} }
+        .question-pane.q-anim{ animation: sitara-q-in .4s cubic-bezier(.22,.61,.36,1) both; }
+
+        /* option cards: springy hover + pop when picked */
+        .option-card{ transition: border-color .18s, background .18s, box-shadow .18s, transform .12s ease; }
+        .option-card:active{ transform: scale(.99); }
+        @keyframes sitara-opt-pop{ 0%{transform:scale(1);} 45%{transform:scale(1.02);} 100%{transform:scale(1);} }
+        .option-card.just-picked{ animation: sitara-opt-pop .34s ease; }
+
+        /* nav buttons bounce when a question becomes answered */
+        @keyframes sitara-nav-pop{ 0%{transform:scale(1);} 50%{transform:scale(1.22);} 100%{transform:scale(1);} }
+        .cbt-question-nav button.just-answered{ animation: sitara-nav-pop .35s ease; }
+        .cbt-question-nav button{ transition: transform .15s, background .2s, border-color .2s, color .2s; }
+
+        /* progress bar */
+        .exam-progress{ height:9px; border-radius:999px; background:#e5e9f0; overflow:hidden; }
+        .exam-progress > span{ display:block; height:100%; width:0; border-radius:999px;
+            background:linear-gradient(90deg,#2563EB,#14b8a6); background-size:200% 100%;
+            animation: sitara-gradient-shift 3s ease infinite; transition:width .55s cubic-bezier(.22,.61,.36,1); }
+
+        /* timer turns urgent & blinks in the final minute */
+        .exam-actions .badge.time-low{ animation: sitara-time-blink 1s steps(1,end) infinite; }
+        @keyframes sitara-time-blink{ 50%{ filter:brightness(1.2); box-shadow:0 0 0 5px rgba(239,68,68,.18);} }
+
+        /* encouraging mascot in the sidebar */
+        .exam-cheer{ background:linear-gradient(135deg,#eef5ff,#e8fbf4); border:1px solid #e4eefb; border-radius:16px; }
+        .exam-cheer img{ width:52px; height:auto; animation: sitara-float 4s ease-in-out infinite; }
+
+        /* red flash overlay when a student leaves the exam */
+        .cheat-flash{ position:fixed; inset:0; background:rgba(239,68,68,.35); z-index:3000; pointer-events:none; opacity:0; }
+        .cheat-flash.show{ animation: sitara-cheat-flash .6s ease; }
+        @keyframes sitara-cheat-flash{ 0%,100%{opacity:0;} 30%{opacity:1;} }
+
+        @media (prefers-reduced-motion: reduce){
+            .question-pane.q-anim,.option-card.just-picked,.cbt-question-nav button.just-answered,
+            .exam-progress > span,.exam-cheer img,.cheat-flash.show{ animation:none!important; }
+        }
+    </style>
 </head>
 <body>
 <div class="exam-topbar py-2">
-    <div class="container-fluid d-flex justify-content-between align-items-center px-4">
-        <div><div class="fw-bold">{{ $exam->title }}</div><small class="text-muted">{{ auth()->user()->name }} · {{ $exam->subject->name ?? '' }}</small></div>
-        <div class="d-flex align-items-center gap-3">
+    <div class="container-fluid d-flex justify-content-between align-items-center gap-3 px-4">
+        <div class="exam-title"><div class="fw-bold">{{ $exam->title }}</div><small class="text-muted">{{ auth()->user()->name }} · {{ $exam->subject->name ?? '' }}</small></div>
+        <div class="exam-actions d-flex align-items-center gap-3">
             <div class="badge bg-soft-danger fs-6 px-3 py-2"><i class="bi bi-clock me-1"></i><span class="cbt-timer" id="timer">--:--</span></div>
             <button class="btn btn-light" onclick="toggleFullscreen()" title="Layar Penuh"><i class="bi bi-arrows-fullscreen"></i></button>
-            <button class="btn btn-primary" onclick="confirmSubmit()"><i class="bi bi-send me-1"></i>Selesai</button>
+            <button class="btn btn-primary" onclick="confirmSubmit()"><i class="bi bi-send me-1"></i><span class="btn-label">Selesai</span></button>
         </div>
     </div>
 </div>
@@ -29,6 +93,13 @@
     <div class="row g-4">
         <div class="col-lg-8 col-xl-9">
             <div class="card"><div class="card-body p-4">
+                {{-- Progress: how many answered --}}
+                <div class="d-flex justify-content-between align-items-center mb-2 small">
+                    <span class="fw-semibold text-muted"><i class="bi bi-check2-circle me-1 text-success"></i><span id="progressLabel">0 dari {{ count($ordered) }} terjawab</span></span>
+                    <span class="fw-bold" style="color:#14b8a6" id="progressPct">0%</span>
+                </div>
+                <div class="exam-progress mb-4"><span id="progressBar"></span></div>
+
                 @foreach($ordered as $i => $q)
                     @php $saved = $answers[$q->id] ?? null; $sval = $saved?->answer[0] ?? null; @endphp
                     <div class="question-pane" data-index="{{ $i }}" style="display:{{ $i===0?'block':'none' }}">
@@ -105,12 +176,18 @@
                     <span><span class="d-inline-block rounded me-1" style="width:14px;height:14px;background:#f59e0b"></span> Ragu-ragu</span>
                     <span><span class="d-inline-block rounded me-1 border" style="width:14px;height:14px;background:#fff"></span> Belum dijawab</span>
                 </div>
+                <div class="exam-cheer d-flex align-items-center gap-2 p-2 mt-3">
+                    <img src="{{ asset('assets/maskot2.png') }}" alt="Maskot SITARA">
+                    <small class="text-muted">Tetap fokus & <b>jujur</b> ya! Kamu pasti bisa 💪</small>
+                </div>
                 <hr>
                 <button class="btn btn-primary w-100" onclick="confirmSubmit()"><i class="bi bi-send me-1"></i>Kumpulkan Ujian</button>
             </div></div>
         </div>
     </div>
 </div>
+
+<div class="cheat-flash" id="cheatFlash"></div>
 
 <form id="submitForm" method="POST" action="{{ route('siswa.exams.submit',$schedule) }}" class="d-none">@csrf</form>
 
@@ -121,8 +198,9 @@ const EXAM_MASCOT = "{{ asset('assets/maskot2.png') }}";
 const CSRF = document.querySelector('meta[name=csrf-token]').content;
 const SAVE_URL = "{{ route('siswa.exams.answer', $schedule) }}";
 const TOTAL = {{ count($ordered) }};
+const STUDENT = @json(auth()->user()->name);
 let current = 0;
-let remaining = {{ $remaining }};
+let remaining = Math.floor({{ $remaining }}); // floor: avoid fractional seconds in the timer
 
 // ---- Timer ----
 const timerEl = document.getElementById('timer');
@@ -133,6 +211,8 @@ function tick() {
     const m = String(Math.floor((remaining%3600)/60)).padStart(2,'0');
     const s = String(remaining%60).padStart(2,'0');
     timerEl.textContent = (h!=='00'? h+':' : '') + m + ':' + s;
+    // urgent styling in the final minute
+    if (remaining <= 60) timerEl.closest('.badge')?.classList.add('time-low');
     if (remaining === 60) Swal.fire({
         toast: true, position: 'top-end', icon: 'warning',
         title: 'Waktu tersisa 1 menit!', showConfirmButton: false, timer: 5000, timerProgressBar: true
@@ -144,11 +224,23 @@ tick(); setInterval(tick, 1000);
 function goTo(i) {
     if (i < 0 || i >= TOTAL) return;
     document.querySelectorAll('.question-pane').forEach(p => p.style.display = 'none');
-    document.querySelector(`.question-pane[data-index="${i}"]`).style.display = 'block';
+    const pane = document.querySelector(`.question-pane[data-index="${i}"]`);
+    pane.style.display = 'block';
+    // re-trigger the slide-in animation
+    pane.classList.remove('q-anim'); void pane.offsetWidth; pane.classList.add('q-anim');
     document.querySelectorAll('.cbt-question-nav button').forEach(b => b.classList.remove('current'));
     document.getElementById('nav-'+i).classList.add('current');
     current = i;
-    window.scrollTo(0,0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- Progress bar ----
+function updateProgress() {
+    const answered = document.querySelectorAll('.cbt-question-nav button.answered').length;
+    const pct = TOTAL ? Math.round(answered / TOTAL * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = answered + ' dari ' + TOTAL + ' terjawab';
+    document.getElementById('progressPct').textContent = pct + '%';
 }
 
 // ---- Save answer ----
@@ -162,12 +254,19 @@ function post(payload) {
 }
 function markAnswered(qid, hasVal) {
     const idx = [...document.querySelectorAll('.question-pane')].find(p => p.querySelector(`[name="q${qid}"],[data-qid="${qid}"]`))?.dataset.index;
-    if (idx !== undefined) document.getElementById('nav-'+idx).classList.toggle('answered', hasVal);
+    if (idx !== undefined) {
+        const btn = document.getElementById('nav-'+idx);
+        btn.classList.toggle('answered', hasVal);
+        if (hasVal) { btn.classList.remove('just-answered'); void btn.offsetWidth; btn.classList.add('just-answered'); }
+        updateProgress();
+    }
 }
 function saveAnswer(qid, value, el) {
     if (el && el.closest('.option-card')) {
-        el.closest('.question-pane').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-        el.closest('.option-card').classList.add('selected');
+        const card = el.closest('.option-card');
+        card.closest('.question-pane').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        card.classList.remove('just-picked'); void card.offsetWidth; card.classList.add('just-picked');
     }
     post({question_id: qid, answer: value}).then(() => markAnswered(qid, value !== ''));
 }
@@ -231,6 +330,86 @@ function toggleFullscreen() {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     else document.exitFullscreen();
 }
+
+/* ============================================================
+   Anti-cheat: detect leaving the exam page + sound warning
+   ============================================================ */
+// --- Warning sound: the school's own audio file, looped while away ---
+const warnAudio = new Audio("{{ asset('assets/warning.mp3') }}");
+warnAudio.loop = true;      // keep playing until the student comes back
+warnAudio.preload = 'auto';
+let audioPrimed = false;
+// Browsers block audio until a user gesture — unlock it silently on first interaction.
+function primeAudio() {
+    if (audioPrimed) return;
+    audioPrimed = true;
+    warnAudio.muted = true;
+    warnAudio.play().then(() => {
+        warnAudio.pause(); warnAudio.currentTime = 0; warnAudio.muted = false;
+    }).catch(() => { warnAudio.muted = false; audioPrimed = false; });
+}
+document.addEventListener('click', primeAudio);
+document.addEventListener('keydown', primeAudio);
+
+function playWarning() { try { warnAudio.currentTime = 0; warnAudio.play().catch(() => {}); } catch (e) {} }
+function stopWarning() { try { warnAudio.pause(); warnAudio.currentTime = 0; } catch (e) {} }
+
+function flashScreen() {
+    const f = document.getElementById('cheatFlash');
+    f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+}
+
+let violations = 0, isAway = false;
+function leftExam() {
+    if (isAway) return;              // debounce blur + visibilitychange firing together
+    isAway = true;
+    playWarning(); flashScreen();
+}
+function returnedToExam() {
+    if (!isAway) return;
+    isAway = false;
+    stopWarning();
+    violations++;
+    Swal.fire({
+        title: 'Kamu keluar dari halaman ujian!',
+        html: '<p class="sitara-swal-text">Aktivitas ini <b>tercatat</b> oleh sistem sebagai <b>pelanggaran ke-' + violations + '</b>.<br>' +
+              'Tetaplah di halaman ujian dan kerjakan dengan <b>jujur</b> — <b>jangan mencontek</b> ya! 🙏</p>',
+        imageUrl: EXAM_MASCOT, imageWidth: 130, imageAlt: 'SITARA',
+        allowOutsideClick: false, allowEscapeKey: false, buttonsStyling: false,
+        confirmButtonText: 'Saya mengerti, lanjut jujur',
+        customClass: {
+            popup: 'sitara-swal', title: 'sitara-swal-title', image: 'sitara-swal-img',
+            actions: 'sitara-swal-actions',
+            confirmButton: 'sitara-swal-btn sitara-swal-btn-danger'
+        }
+    });
+}
+// tab switch / minimize
+document.addEventListener('visibilitychange', () => { document.hidden ? leftExam() : returnedToExam(); });
+// switching to another app / window while tab still "visible"
+window.addEventListener('blur', () => { if (!document.hidden) leftExam(); });
+window.addEventListener('focus', () => { if (!document.hidden) returnedToExam(); });
+
+/* ============================================================
+   Friendly reminder to stay honest (with mascot) on start
+   ============================================================ */
+window.addEventListener('load', () => {
+    updateProgress();
+    Swal.fire({
+        title: 'Semangat, ' + STUDENT + '! 🦉',
+        html: '<p class="sitara-swal-text">Kerjakan dengan tenang, teliti, dan <b>jujur</b>.<br>' +
+              'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau &amp; mencatat</b> aktivitasmu, ' +
+              'dan akan berbunyi peringatan bila kamu keluar.<br><br><b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
+        imageUrl: EXAM_MASCOT, imageWidth: 150, imageAlt: 'SITARA',
+        allowOutsideClick: false, buttonsStyling: false,
+        confirmButtonText: 'Siap, mulai ujian!',
+        customClass: {
+            popup: 'sitara-swal', title: 'sitara-swal-title', image: 'sitara-swal-img',
+            actions: 'sitara-swal-actions',
+            confirmButton: 'sitara-swal-btn sitara-swal-btn-primary'
+        }
+    }).then(() => primeAudio());
+});
 </script>
 </body>
 </html>
