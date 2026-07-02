@@ -23,6 +23,7 @@
                 </ul>
                 <div class="d-flex gap-2">
                     <a href="{{ route('guru.results.index', ['schedule'=>$s->id]) }}" class="btn btn-sm btn-primary flex-fill"><i class="bi bi-clipboard-check me-1"></i>Hasil</a>
+                    <a href="{{ route('guru.schedules.attendance',$s) }}" class="btn btn-sm btn-outline-danger" title="Daftar Hadir & Berita Acara (PDF)"><i class="bi bi-file-earmark-pdf"></i></a>
                     <a href="{{ route('guru.schedules.edit',$s) }}" class="btn btn-sm btn-light"><i class="bi bi-pencil"></i></a>
                     <form action="{{ route('guru.schedules.destroy',$s) }}" method="POST" class="d-inline" data-confirm="delete" data-confirm-text="Jadwal ujian ini akan dihapus.">@csrf @method('DELETE')<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button></form>
                 </div>

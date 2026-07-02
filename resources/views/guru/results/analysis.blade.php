@@ -2,9 +2,11 @@
 @section('title', 'Analisis Ujian')
 
 @section('content')
-<div class="d-flex align-items-center gap-2 mb-3">
+<div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
     <a href="{{ route('guru.results.index') }}" class="btn btn-light"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title">Analisis: {{ $exam->title }}</h1>
+    <h1 class="page-title mb-0 me-auto">Analisis: {{ $exam->title }}</h1>
+    <a href="{{ route('guru.analysis.excel', $exam) }}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+    <a href="{{ route('guru.analysis.pdf', $exam) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
 </div>
 
 <div class="row g-3 mb-4">

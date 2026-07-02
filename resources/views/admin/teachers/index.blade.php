@@ -4,7 +4,11 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="page-title">Data Guru</h1>
-    <a href="{{ route('admin.teachers.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tambah Guru</a>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ route('admin.reports.teachers.excel', request()->only('search')) }}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+        <a href="{{ route('admin.reports.teachers.pdf', request()->only('search')) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
+        <a href="{{ route('admin.teachers.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tambah Guru</a>
+    </div>
 </div>
 <div class="card" data-aos="fade-up"><div class="card-body">
     <form class="row g-2 mb-3"><div class="col-md-6"><input name="search" value="{{ request('search') }}" class="form-control" placeholder="Cari nama / NIP..."></div><div class="col-md-2"><button class="btn btn-primary w-100"><i class="bi bi-search"></i></button></div></form>

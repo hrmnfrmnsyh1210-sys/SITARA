@@ -4,9 +4,12 @@
 @php $show = $result->examSchedule->exam->show_result; @endphp
 
 @section('content')
-<div class="d-flex align-items-center gap-2 mb-3">
+<div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
     <a href="{{ route('siswa.results.index') }}" class="btn btn-light"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title">Hasil Ujian</h1>
+    <h1 class="page-title mb-0 me-auto">Hasil Ujian</h1>
+    @if($show && $result->status==='graded')
+        <a href="{{ route('siswa.results.pdf', $result) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Unduh Kartu Hasil</a>
+    @endif
 </div>
 
 <div class="card mb-4" data-aos="fade-up"><div class="card-body p-4">

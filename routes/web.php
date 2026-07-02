@@ -88,7 +88,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('rooms', Admin\RoomController::class);
     Route::resource('academic-years', Admin\AcademicYearController::class);
     Route::resource('announcements', Admin\AnnouncementController::class);
+
+    // Laporan (rekap nilai, data siswa, data guru) — tampilan + ekspor Excel/PDF.
     Route::get('/reports/scores', [Admin\ReportController::class, 'scores'])->name('reports.scores');
+    Route::get('/reports/scores/excel', [Admin\ReportController::class, 'scoresExcel'])->name('reports.scores.excel');
+    Route::get('/reports/scores/pdf', [Admin\ReportController::class, 'scoresPdf'])->name('reports.scores.pdf');
+    Route::get('/reports/students/excel', [Admin\ReportController::class, 'studentsExcel'])->name('reports.students.excel');
+    Route::get('/reports/students/pdf', [Admin\ReportController::class, 'studentsPdf'])->name('reports.students.pdf');
+    Route::get('/reports/teachers/excel', [Admin\ReportController::class, 'teachersExcel'])->name('reports.teachers.excel');
+    Route::get('/reports/teachers/pdf', [Admin\ReportController::class, 'teachersPdf'])->name('reports.teachers.pdf');
 
     // Langganan sekolah
     Route::get('/subscription', [Admin\SubscriptionController::class, 'index'])->name('subscription.index');
@@ -116,9 +124,14 @@ Route::middleware(['auth', 'role:guru', 'subscribed'])->prefix('guru')->name('gu
 
     // Hasil & penilaian
     Route::get('/results', [Guru\ResultController::class, 'index'])->name('results.index');
+    Route::get('/results/export/excel', [Guru\ResultController::class, 'scoresExcel'])->name('results.excel');
+    Route::get('/results/export/pdf', [Guru\ResultController::class, 'scoresPdf'])->name('results.pdf');
     Route::get('/results/{result}', [Guru\ResultController::class, 'show'])->name('results.show');
     Route::post('/results/{result}/grade', [Guru\ResultController::class, 'grade'])->name('results.grade');
     Route::get('/analysis/{exam}', [Guru\ResultController::class, 'analysis'])->name('analysis');
+    Route::get('/analysis/{exam}/excel', [Guru\ResultController::class, 'analysisExcel'])->name('analysis.excel');
+    Route::get('/analysis/{exam}/pdf', [Guru\ResultController::class, 'analysisPdf'])->name('analysis.pdf');
+    Route::get('/schedules/{schedule}/attendance', [Guru\ResultController::class, 'attendancePdf'])->name('schedules.attendance');
 });
 
 /*
@@ -136,5 +149,6 @@ Route::middleware(['auth', 'role:siswa', 'subscribed'])->prefix('siswa')->name('
     Route::post('/exams/{schedule}/violation', [Siswa\ExamController::class, 'recordViolation'])->name('exams.violation');
     Route::post('/exams/{schedule}/submit', [Siswa\ExamController::class, 'submit'])->name('exams.submit');
     Route::get('/results', [Siswa\ResultController::class, 'index'])->name('results.index');
+    Route::get('/results/{result}/pdf', [Siswa\ResultController::class, 'pdf'])->name('results.pdf');
     Route::get('/results/{result}', [Siswa\ResultController::class, 'show'])->name('results.show');
 });

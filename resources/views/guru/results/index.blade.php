@@ -2,7 +2,13 @@
 @section('title', 'Hasil & Koreksi')
 
 @section('content')
-<h1 class="page-title mb-3">Hasil Ujian & Koreksi</h1>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title mb-0">Hasil Ujian & Koreksi</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ route('guru.results.excel', request()->only('schedule')) }}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+        <a href="{{ route('guru.results.pdf', request()->only('schedule')) }}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
+    </div>
+</div>
 <div class="card" data-aos="fade-up"><div class="card-body">
     <form class="row g-2 mb-3">
         <div class="col-md-6"><select name="schedule" class="form-select" onchange="this.form.submit()">
