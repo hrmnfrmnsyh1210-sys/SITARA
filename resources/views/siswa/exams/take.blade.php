@@ -200,7 +200,6 @@ const SAVE_URL = "{{ route('siswa.exams.answer', $schedule) }}";
 const VIOLATION_URL = "{{ route('siswa.exams.violation', $schedule) }}";
 const TOTAL = {{ count($ordered) }};
 const STUDENT = @json(auth()->user()->name);
-const MAX_VIOLATIONS = 3;   // keluar halaman sebanyak ini → ujian otomatis dikumpulkan
 let current = 0;
 let remaining = Math.floor({{ $remaining }}); // floor: avoid fractional seconds in the timer
 
@@ -411,33 +410,20 @@ function returnedToExam() {
       .catch(() => { violations++; showViolationModal(); });
 }
 function showViolationModal() {
-    const swalBase = {
+    // We record & warn, but never auto-terminate — a network drop or phone call
+    // shouldn't end the exam. The teacher reviews the count and decides.
+    Swal.fire({
+        title: 'Kamu keluar dari halaman ujian!',
+        html: '<p class="sitara-swal-text">Aktivitas ini <b>tercatat</b> oleh sistem (<b>pelanggaran ke-' + violations + '</b>) dan akan <b>dilaporkan ke guru</b>.<br>' +
+              'Jika ini karena kendala jaringan, segera lanjutkan ujianmu. Tetaplah <b>jujur</b> — <b>jangan mencontek</b> ya! 🙏</p>',
         imageUrl: EXAM_MASCOT, imageWidth: 130, imageAlt: 'SITARA',
         allowOutsideClick: false, allowEscapeKey: false, buttonsStyling: false,
+        confirmButtonText: 'Saya mengerti, lanjut',
         customClass: {
             popup: 'sitara-swal', title: 'sitara-swal-title', image: 'sitara-swal-img',
             actions: 'sitara-swal-actions',
             confirmButton: 'sitara-swal-btn sitara-swal-btn-danger'
         }
-    };
-    // limit reached → force submit
-    if (violations >= MAX_VIOLATIONS) {
-        Swal.fire({ ...swalBase,
-            title: 'Batas pelanggaran tercapai!',
-            html: '<p class="sitara-swal-text">Kamu telah keluar dari halaman ujian sebanyak <b>' + violations + ' kali</b>.<br>' +
-                  'Sesuai aturan, ujianmu akan <b>otomatis dikumpulkan</b> sekarang.</p>',
-            confirmButtonText: 'Kumpulkan sekarang'
-        }).then(doSubmit);
-        setTimeout(doSubmit, 5000);   // fail-safe submit even if the button isn't tapped
-        return;
-    }
-    const left = Math.max(MAX_VIOLATIONS - violations, 0);
-    Swal.fire({ ...swalBase,
-        title: 'Kamu keluar dari halaman ujian!',
-        html: '<p class="sitara-swal-text">Aktivitas ini <b>tercatat</b> oleh sistem (<b>pelanggaran ke-' + violations + '</b>).<br>' +
-              'Sisa kesempatan: <b>' + left + '</b> lagi sebelum ujian <b>otomatis dikumpulkan</b>.<br>' +
-              'Tetaplah di halaman ujian dan kerjakan dengan <b>jujur</b> — <b>jangan mencontek</b> ya! 🙏</p>',
-        confirmButtonText: 'Saya mengerti, lanjut jujur'
     });
 }
 // tab switch / minimize
@@ -454,9 +440,9 @@ window.addEventListener('load', () => {
     Swal.fire({
         title: 'Semangat, ' + STUDENT + '! 🦉',
         html: '<p class="sitara-swal-text">Kerjakan dengan tenang, teliti, dan <b>jujur</b>.<br>' +
-              'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau &amp; mencatat</b> aktivitasmu ' +
-              'dan akan <b>berbunyi peringatan</b> bila kamu keluar. Keluar sebanyak <b>' + MAX_VIOLATIONS + ' kali</b> ' +
-              'membuat ujian <b>otomatis dikumpulkan</b>.<br><br><b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
+              'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau, mencatat, &amp; melaporkan</b> ' +
+              'aktivitasmu ke guru, dan akan <b>berbunyi peringatan</b> bila kamu keluar.<br><br>' +
+              '<b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
         imageUrl: EXAM_MASCOT, imageWidth: 150, imageAlt: 'SITARA',
         allowOutsideClick: false, buttonsStyling: false,
         confirmButtonText: 'Siap, mulai ujian!',

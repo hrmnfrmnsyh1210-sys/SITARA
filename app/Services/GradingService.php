@@ -83,12 +83,15 @@ class GradingService
 
         $passingScore = $result->examSchedule->exam->passing_score ?? 70;
 
+        // Teacher's manual decision wins when set; otherwise fall back to the score.
+        $isPassed = $result->pass_override ?? ($score >= $passingScore);
+
         $result->update([
             'total_score' => $score,
             'correct_count' => $correct,
             'wrong_count' => $wrong,
             'empty_count' => $empty,
-            'is_passed' => $score >= $passingScore,
+            'is_passed' => $isPassed,
             'status' => $hasUngraded ? 'submitted' : 'graded',
         ]);
 

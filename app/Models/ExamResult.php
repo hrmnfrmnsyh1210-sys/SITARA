@@ -14,7 +14,7 @@ class ExamResult extends Model
     protected $fillable = [
         'exam_schedule_id', 'student_id', 'started_at', 'submitted_at', 'status',
         'total_score', 'correct_count', 'wrong_count', 'empty_count', 'is_passed',
-        'question_order', 'remaining_seconds', 'ip_address', 'violation_count',
+        'question_order', 'remaining_seconds', 'ip_address', 'violation_count', 'pass_override',
     ];
 
     protected $casts = [
@@ -22,6 +22,7 @@ class ExamResult extends Model
         'submitted_at' => 'datetime',
         'question_order' => 'array',
         'is_passed' => 'boolean',
+        'pass_override' => 'boolean',
         'total_score' => 'decimal:2',
     ];
 

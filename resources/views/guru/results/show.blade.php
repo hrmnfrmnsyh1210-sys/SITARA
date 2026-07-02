@@ -46,6 +46,28 @@
                 @endif
             </div>
         @endforeach
+
+        @if(($result->violation_count ?? 0) > 0)
+            @php $ov = is_null($result->pass_override) ? 'auto' : ($result->pass_override ? 'pass' : 'fail'); @endphp
+            <div class="border rounded p-3 mb-2 bg-soft-danger-subtle" style="background:#fff5f5">
+                <div class="fw-semibold mb-1"><i class="bi bi-shield-exclamation text-danger me-1"></i>Keputusan Kelulusan</div>
+                <p class="text-muted small mb-2">Siswa ini punya <b>{{ $result->violation_count }} pelanggaran</b>. Kamu bisa menentukan kelulusannya secara manual, atau biarkan <b>Otomatis</b> (mengikuti nilai).</p>
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto"><label class="form-label mb-0 small" for="pass_override">Status kelulusan:</label></div>
+                    <div class="col-auto">
+                        <select name="pass_override" id="pass_override" class="form-select form-select-sm">
+                            <option value="auto" @selected($ov==='auto')>Otomatis (ikut nilai)</option>
+                            <option value="pass" @selected($ov==='pass')>Luluskan</option>
+                            <option value="fail" @selected($ov==='fail')>Tidak luluskan</option>
+                        </select>
+                    </div>
+                    @unless(is_null($result->pass_override))
+                        <div class="col-auto"><span class="badge bg-soft-info"><i class="bi bi-hand-index me-1"></i>Keputusan manual guru</span></div>
+                    @endunless
+                </div>
+            </div>
+        @endif
+
         <button class="btn btn-primary mt-2"><i class="bi bi-check-lg me-1"></i>Simpan Nilai & Finalisasi</button>
     </div></div>
 </form>

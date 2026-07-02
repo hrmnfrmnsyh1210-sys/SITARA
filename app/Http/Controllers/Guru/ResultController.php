@@ -39,7 +39,21 @@ class ResultController extends Controller
     {
         $this->authorizeResult($result);
 
-        $scores = $request->validate(['scores' => ['array']])['scores'] ?? [];
+        $data = $request->validate([
+            'scores' => ['array'],
+            'pass_override' => ['nullable', 'in:auto,pass,fail'],
+        ]);
+        $scores = $data['scores'] ?? [];
+
+        // Manual pass/fail decision (only offered when the student has violations).
+        if ($request->has('pass_override')) {
+            $result->pass_override = match ($request->input('pass_override')) {
+                'pass' => true,
+                'fail' => false,
+                default => null,   // 'auto' → follow the score
+            };
+            $result->save();
+        }
 
         foreach ($scores as $answerId => $score) {
             $answer = Answer::where('id', $answerId)->where('exam_result_id', $result->id)->first();
