@@ -346,9 +346,12 @@ warnAudio.volume = 1;
 
 // Escalating loudness: gentle at first (a brief accidental switch shouldn't
 // disturb the room), then rises the longer the student stays away.
-const WARN_GAIN_START = 0.8;   // soft opening level
-const WARN_GAIN_MAX   = 2.0;   // ceiling — audible even at low volume, not blaring
-const WARN_RAMP_SEC   = 7;     // seconds to climb from start to max
+// NOTE: gain only helps when the phone volume is LOW, not zero — 0 × gain = 0.
+// A browser cannot raise the device's hardware/media volume, so we pair the
+// sound with vibration + persistent screen flashing (both volume-independent).
+const WARN_GAIN_START = 1.0;   // opening level
+const WARN_GAIN_MAX   = 4.0;   // ceiling — pushes hard so a low (not muted) volume is still audible
+const WARN_RAMP_SEC   = 6;     // seconds to climb from start to max
 let actx = null, warnGain = null, audioPrimed = false;
 
 // Browsers block audio until a user gesture — unlock & wire the graph on first interaction.
@@ -367,6 +370,25 @@ function primeAudio() {
 document.addEventListener('click', primeAudio);
 document.addEventListener('keydown', primeAudio);
 
+// Volume-independent alarms: vibration + repeating screen flash. These keep
+// alerting the student even when the phone's media volume is turned all the way
+// down, which no audio API can override.
+let alertTimer = null;
+function startVolumeProofAlarm() {
+    stopVolumeProofAlarm();
+    const pulse = () => {
+        flashScreen();
+        // Android fires vibration regardless of volume; iOS Safari ignores it (no-op).
+        try { if (navigator.vibrate) navigator.vibrate([400, 200, 400]); } catch (e) {}
+    };
+    pulse();
+    alertTimer = setInterval(pulse, 1200);   // keep pulsing the whole time they're away
+}
+function stopVolumeProofAlarm() {
+    if (alertTimer) { clearInterval(alertTimer); alertTimer = null; }
+    try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {}
+}
+
 function playWarning() {
     if (actx && actx.state === 'suspended') actx.resume();   // resume in case it was suspended
     if (warnGain && actx) {
@@ -376,12 +398,14 @@ function playWarning() {
         warnGain.gain.linearRampToValueAtTime(WARN_GAIN_MAX, t + WARN_RAMP_SEC);
     }
     try { warnAudio.currentTime = 0; warnAudio.play().catch(() => {}); } catch (e) {}
+    startVolumeProofAlarm();
 }
 function stopWarning() {
     try {
         if (warnGain && actx) { warnGain.gain.cancelScheduledValues(actx.currentTime); warnGain.gain.value = WARN_GAIN_START; }
         warnAudio.pause(); warnAudio.currentTime = 0;
     } catch (e) {}
+    stopVolumeProofAlarm();
 }
 
 function flashScreen() {
