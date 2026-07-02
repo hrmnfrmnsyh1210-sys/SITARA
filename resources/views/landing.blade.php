@@ -14,6 +14,9 @@
     <style>
         :root { --hero-blue: #1763c9; --hero-blue-dark: #0f4ea3; --hero-mint: #2fe3a8; }
 
+        /* stop the page from scrolling sideways (no white gutter on drag) */
+        html, body { overflow-x: hidden; max-width: 100%; }
+
         /* ---- Navbar (transparent over hero, solid on scroll) ---- */
         .navbar-hero { transition: background .3s, box-shadow .3s, padding .3s; padding-top: 1rem; padding-bottom: 1rem; }
         .navbar-hero .navbar-brand, .navbar-hero .nav-link, .navbar-hero .social-ic { color: #fff; }
@@ -68,10 +71,11 @@
         .navbar-hero .navbar-toggler i { line-height: 1; }
         /* give the brand + toggler breathing room from the screen edge */
         @media (max-width: 991.98px) {
-            .navbar-hero > .container { padding-left: 1.15rem; padding-right: 1.15rem; }
+            .navbar-hero > .container { padding-left: 1.35rem; padding-right: 1.35rem; }
+            .navbar-hero .navbar-toggler { margin-right: .1rem; }
         }
         @media (max-width: 400px) {
-            .navbar-hero > .container { padding-left: .9rem; padding-right: .9rem; }
+            .navbar-hero > .container { padding-left: 1.1rem; padding-right: 1.1rem; }
         }
 
         @media (max-width: 991.98px) {
