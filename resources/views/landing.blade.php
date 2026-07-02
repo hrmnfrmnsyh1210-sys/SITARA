@@ -66,6 +66,13 @@
         .navbar-hero .navbar-toggler { padding: .3rem .55rem; border-radius: 10px; background: rgba(255,255,255,.12); }
         .navbar-hero .navbar-toggler:focus { box-shadow: none; }
         .navbar-hero .navbar-toggler i { line-height: 1; }
+        /* give the brand + toggler breathing room from the screen edge */
+        @media (max-width: 991.98px) {
+            .navbar-hero > .container { padding-left: 1.15rem; padding-right: 1.15rem; }
+        }
+        @media (max-width: 400px) {
+            .navbar-hero > .container { padding-left: .9rem; padding-right: .9rem; }
+        }
 
         @media (max-width: 991.98px) {
             .hero { padding: 5rem 0 3.5rem; text-align: center; }
