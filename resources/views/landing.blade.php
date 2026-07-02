@@ -68,9 +68,10 @@
         .navbar-hero .navbar-toggler i { line-height: 1; }
 
         @media (max-width: 991.98px) {
-            .hero { padding: 5rem 0 4rem; text-align: center; }
+            .hero { padding: 5rem 0 3.5rem; text-align: center; }
             .hero .lead-text { margin-inline: auto; }
             .hero-blob { display: none; }
+            .hero-art img { max-height: 320px !important; }
 
             /* Solid dropdown panel so the menu never overlaps the hero */
             .navbar-hero .navbar-collapse {
@@ -91,6 +92,20 @@
                 border-top: 1px solid rgba(255,255,255,.15);
             }
             .navbar-hero .btn-pill-mint { padding: .65rem 1.5rem; }
+        }
+
+        /* ---- Phones: tighter hero + smaller mascot ---- */
+        @media (max-width: 575.98px) {
+            .hero { padding: 4.5rem 0 3rem; }
+            .hero h1 { font-size: clamp(1.9rem, 8vw, 2.4rem); }
+            .hero .eyebrow { font-size: .78rem; }
+            .hero .how-line { font-size: .95rem; }
+            .hero-art { margin-top: 1.5rem; }
+            .hero-art img { max-height: 240px !important; }
+            .btn-pill-mint { padding: .85rem 2rem; }
+            /* let the two hero CTAs share the row instead of stacking huge */
+            .hero .d-flex.flex-wrap.gap-3 { gap: .65rem !important; }
+            .section { padding: 3.5rem 0; }
         }
     </style>
 </head>

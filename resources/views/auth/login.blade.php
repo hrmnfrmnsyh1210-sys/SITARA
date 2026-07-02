@@ -18,7 +18,7 @@
     <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
     <style>
         body {
-            min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; margin: 0;
+            min-height: 100vh; display: grid; place-items: safe center; padding: 1.5rem; margin: 0;
             background:
                 radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 45%),
                 radial-gradient(110% 110% at 100% 0%, rgba(96,165,250,.55) 0%, rgba(96,165,250,0) 50%),
@@ -136,11 +136,29 @@
 
         /* ---- Responsive: stack, keep mascot ---- */
         @media (max-width: 820px) {
-            .login-shell { grid-template-columns: 1fr; max-width: 440px; min-height: 0; }
-            .login-hero { padding: 2.25rem 2rem 1rem; text-align: center; align-items: center; }
-            .login-hero .brand-chip { margin: 0 auto 1rem; }
-            .login-hero .mascot { width: 180px; margin-top: .5rem; }
-            .login-form-panel { padding: 2rem; }
+            body { padding: 1rem; }
+            .login-shell { grid-template-columns: 1fr; max-width: 440px; min-height: 0; border-radius: 22px; }
+            .login-hero { padding: 1.75rem 1.5rem .5rem; text-align: center; align-items: center; }
+            .login-hero .brand-chip { margin: 0 auto .6rem; }
+            .login-hero .greet { font-size: 1.7rem; }
+            .login-hero .greet-sub { font-size: .9rem; margin-top: .35rem; }
+            .login-hero .mascot { width: 150px; margin-top: .4rem; }
+            .login-form-panel { padding: 1.75rem 1.5rem; }
+            .login-form-panel h2 { font-size: 1.3rem; }
+            .login-form-panel .panel-sub { margin-bottom: 1.25rem; }
+        }
+
+        /* ---- Very small / short screens: shrink the hero further ---- */
+        @media (max-width: 380px) {
+            .login-hero { padding: 1.4rem 1.25rem .25rem; }
+            .login-hero .greet { font-size: 1.45rem; }
+            .login-hero .greet-sub { font-size: .84rem; }
+            .login-hero .mascot { width: 112px; }
+            .login-form-panel { padding: 1.5rem 1.25rem; }
+            .login-form-panel .input-pill input { font-size: .9rem; padding: .6rem 0; }
+        }
+        @media (max-height: 720px) and (max-width: 820px) {
+            .login-hero .mascot { width: 96px; }
         }
     </style>
 </head>
