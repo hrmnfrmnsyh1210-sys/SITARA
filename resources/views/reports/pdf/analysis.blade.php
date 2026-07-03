@@ -11,7 +11,7 @@
         </tr>
     </table>
 
-    <h3 style="font-size:11px;margin:14px 0 4px">Peringkat Siswa</h3>
+    <h3 class="section-title">Peringkat Siswa</h3>
     <table class="data">
         <thead>
             <tr>
@@ -35,7 +35,7 @@
         </tbody>
     </table>
 
-    <h3 style="font-size:11px;margin:16px 0 4px">Analisis Butir Soal</h3>
+    <h3 class="section-title">Analisis Butir Soal</h3>
     <table class="data">
         <thead>
             <tr>

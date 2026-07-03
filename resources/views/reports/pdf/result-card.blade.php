@@ -10,12 +10,16 @@
         <tr><td class="k">Dikumpulkan</td><td class="s">:</td><td>{{ $result->submitted_at?->translatedFormat('d F Y, H:i') ?? '-' }}</td></tr>
     </table>
 
+    @php
+        $accent = $result->is_passed ? '#059669' : '#dc2626';
+        $tint = $result->is_passed ? '#e6fbf6' : '#fdecec';
+    @endphp
     <table style="width:100%;border-collapse:collapse;margin-bottom:14px">
         <tr>
-            <td style="width:40%;border:2px solid {{ $result->is_passed ? '#16a34a' : '#dc2626' }};border-radius:6px;text-align:center;padding:14px">
-                <div style="font-size:11px;color:#6b7280">NILAI AKHIR</div>
-                <div style="font-size:40px;font-weight:bold;color:{{ $result->is_passed ? '#16a34a' : '#dc2626' }}">{{ $result->total_score }}</div>
-                <div style="font-size:12px;font-weight:bold;color:{{ $result->is_passed ? '#16a34a' : '#dc2626' }}">
+            <td style="width:40%;border:1px solid {{ $accent }};border-top:4px solid {{ $accent }};border-radius:10px;background:{{ $tint }};text-align:center;padding:16px 14px">
+                <div style="font-size:9px;color:#64748b;letter-spacing:1px;text-transform:uppercase">Nilai Akhir</div>
+                <div style="font-size:42px;font-weight:bold;color:{{ $accent }};line-height:1.1">{{ $result->total_score }}</div>
+                <div style="font-size:11px;font-weight:bold;letter-spacing:.5px;color:{{ $accent }}">
                     {{ $result->is_passed ? 'LULUS' : 'TIDAK LULUS' }}
                 </div>
             </td>

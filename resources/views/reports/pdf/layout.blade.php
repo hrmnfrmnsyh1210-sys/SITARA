@@ -4,57 +4,79 @@
     <meta charset="utf-8">
     <title>{{ $title ?? 'Laporan' }}</title>
     <style>
-        @page { margin: 90px 40px 70px 40px; }
+        @page { margin: 112px 36px 64px 36px; }
         * { font-family: DejaVu Sans, sans-serif; }
         body { font-size: 11px; color: #1f2937; margin: 0; }
 
-        /* Kop surat */
-        .kop { position: fixed; top: -70px; left: 0; right: 0; height: 78px; border-bottom: 2px solid #111827; padding-bottom: 6px; }
-        .kop table { width: 100%; border-collapse: collapse; }
-        .kop .logo { width: 64px; vertical-align: middle; text-align: center; }
-        .kop .logo img { max-height: 58px; max-width: 58px; }
+        /* ===== Kop surat / letterhead ===== */
+        .kop { position: fixed; top: -92px; left: 0; right: 0; height: 96px; }
+        .kop table.head { width: 100%; border-collapse: collapse; }
+        .kop .logo { width: 62px; vertical-align: middle; text-align: center; }
+        .kop .logo img { max-height: 56px; max-width: 56px; }
         .kop .txt { vertical-align: middle; text-align: center; }
-        .kop .school { font-size: 17px; font-weight: bold; letter-spacing: .3px; text-transform: uppercase; }
-        .kop .school .lvl { display: block; font-size: 12px; letter-spacing: 2px; font-weight: bold; }
-        .kop .addr { font-size: 9px; color: #4b5563; margin-top: 2px; }
+        .kop .school { font-size: 18px; font-weight: bold; letter-spacing: .4px; text-transform: uppercase; color: #0f172a; }
+        .kop .school .lvl { display: block; font-size: 11px; letter-spacing: 3px; font-weight: bold; color: #2563EB; margin-top: 2px; }
+        .kop .addr { font-size: 8.5px; color: #64748b; margin-top: 4px; }
+        .kop .rule { height: 3px; margin-top: 8px; background-image: linear-gradient(90deg, #2563EB 0%, #14b8a6 100%); border-radius: 2px; }
 
-        .foot { position: fixed; bottom: -50px; left: 0; right: 0; height: 40px; font-size: 8px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
+        /* ===== Footer ===== */
+        .foot { position: fixed; bottom: -44px; left: 0; right: 0; height: 34px; font-size: 8px; color: #94a3b8; border-top: 1px solid #eef2f7; padding-top: 5px; }
+        .foot .brand { color: #2563EB; font-weight: bold; }
         .foot .pn:after { content: counter(page); }
 
-        h1.report-title { text-align: center; font-size: 14px; margin: 4px 0 2px; text-transform: uppercase; }
-        .report-sub { text-align: center; font-size: 10px; color: #6b7280; margin: 0 0 12px; }
+        /* ===== Judul laporan ===== */
+        h1.report-title { text-align: center; font-size: 15px; font-weight: bold; letter-spacing: .5px; margin: 2px 0 0; text-transform: uppercase; color: #0f172a; }
+        .title-rule { width: 68px; height: 3px; margin: 7px auto 5px; background-image: linear-gradient(90deg, #2563EB 0%, #14b8a6 100%); border-radius: 2px; }
+        .report-sub { text-align: center; font-size: 10px; color: #64748b; margin: 0 0 14px; }
 
-        table.meta { width: 100%; font-size: 10px; margin-bottom: 10px; }
-        table.meta td { padding: 1px 4px; vertical-align: top; }
-        table.meta td.k { width: 130px; color: #6b7280; }
-        table.meta td.s { width: 12px; }
+        /* ===== Blok meta (panel lembut) ===== */
+        table.meta { width: 100%; font-size: 10px; margin: 0 0 12px; background: #f8fafc; border: 1px solid #eef2f7; border-left: 3px solid #2563EB; border-radius: 8px; }
+        table.meta td { padding: 4px 9px; vertical-align: top; }
+        table.meta td.k { width: 150px; color: #64748b; }
+        table.meta td.s { width: 10px; color: #94a3b8; }
 
+        /* ===== Tabel data ===== */
         table.data { width: 100%; border-collapse: collapse; margin-top: 4px; }
-        table.data th, table.data td { border: 1px solid #cbd5e1; padding: 5px 6px; }
-        table.data thead th { background: #2563eb; color: #fff; font-size: 10px; text-align: center; }
+        table.data th, table.data td { border: 1px solid #e8edf3; padding: 5px 7px; font-size: 10px; }
+        table.data thead th { background: #2563EB; color: #fff; font-size: 9px; text-transform: uppercase; letter-spacing: .4px; text-align: center; padding: 7px 6px; border-color: #2f6bef; border-bottom: 2px solid #14b8a6; }
         table.data tbody td { font-size: 10px; }
-        table.data tbody tr:nth-child(even) td { background: #f8fafc; }
+        table.data tbody tr:nth-child(even) td { background: #f6f9fd; }
         .text-center { text-align: center; }
         .text-end { text-align: right; }
         .fw-bold { font-weight: bold; }
-        .muted { color: #6b7280; }
-        .pass { color: #16a34a; font-weight: bold; }
+        .muted { color: #94a3b8; }
+        .pass { color: #059669; font-weight: bold; }
         .fail { color: #dc2626; font-weight: bold; }
 
-        .summary { width: 100%; border-collapse: collapse; margin: 6px 0 14px; }
-        .summary td { border: 1px solid #e5e7eb; padding: 8px; text-align: center; width: 20%; }
-        .summary .val { font-size: 16px; font-weight: bold; color: #111827; }
-        .summary .lbl { font-size: 9px; color: #6b7280; text-transform: uppercase; }
+        /* ===== Kartu ringkasan (stat) ===== */
+        .summary { width: 100%; border-collapse: separate; border-spacing: 5px 0; table-layout: fixed; margin: 4px 0 16px; }
+        .summary td { background: #fff; border: 1px solid #e9eef5; border-top: 3px solid #2563EB; border-radius: 9px; padding: 10px 6px 11px; text-align: center; }
+        .summary .val { font-size: 19px; font-weight: bold; color: #0f172a; line-height: 1.1; }
+        .summary .lbl { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: .6px; margin-top: 3px; }
+        .summary td:nth-child(1) { border-top-color: #2563EB; }
+        .summary td:nth-child(1) .val { color: #2563EB; }
+        .summary td:nth-child(2) { border-top-color: #14b8a6; }
+        .summary td:nth-child(2) .val { color: #0d9488; }
+        .summary td:nth-child(3) { border-top-color: #f59e0b; }
+        .summary td:nth-child(3) .val { color: #d97706; }
+        .summary td:nth-child(4) { border-top-color: #0ea5e9; }
+        .summary td:nth-child(4) .val { color: #0284c7; }
+        .summary td:nth-child(5) { border-top-color: #7c3aed; }
+        .summary td:nth-child(5) .val { color: #7c3aed; }
 
-        .sign { width: 100%; margin-top: 28px; font-size: 10px; page-break-inside: avoid; }
+        /* ===== Sub-judul seksi ===== */
+        h3.section-title { font-size: 11px; color: #0f172a; margin: 16px 0 5px; padding-left: 8px; border-left: 3px solid #14b8a6; }
+
+        /* ===== Tanda tangan ===== */
+        .sign { width: 100%; margin-top: 26px; font-size: 10px; page-break-inside: avoid; }
         .sign td { vertical-align: top; width: 50%; }
-        .sign .space { height: 58px; }
-        .sign .name { font-weight: bold; text-decoration: underline; }
+        .sign .space { height: 56px; }
+        .sign .name { font-weight: bold; text-decoration: underline; color: #0f172a; }
     </style>
 </head>
 <body>
     <div class="kop">
-        <table>
+        <table class="head">
             <tr>
                 @if(!empty($logoPath))
                     <td class="logo"><img src="{{ $logoPath }}" alt="logo"></td>
@@ -72,17 +94,19 @@
                 </td>
             </tr>
         </table>
+        <div class="rule"></div>
     </div>
 
     <div class="foot">
         <table style="width:100%"><tr>
-            <td>Dicetak melalui SITARA — {{ now()->translatedFormat('d F Y H:i') }}</td>
+            <td>Dicetak melalui <span class="brand">SITARA</span> — {{ now()->translatedFormat('d F Y H:i') }}</td>
             <td style="text-align:right">Halaman <span class="pn"></span></td>
         </tr></table>
     </div>
 
     <main>
         <h1 class="report-title">{{ $title ?? 'Laporan' }}</h1>
+        <div class="title-rule"></div>
         @isset($subtitle)<p class="report-sub">{{ $subtitle }}</p>@endisset
 
         @if(!empty($meta))
