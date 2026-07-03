@@ -146,8 +146,8 @@
     {{-- ============ Structured Data (JSON-LD) ============ --}}
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
+        "@@context": "https://schema.org",
+        "@@type": "SoftwareApplication",
         "name": "SITARA",
         "alternateName": "Sistem Tes Akademik Terpadu",
         "applicationCategory": "EducationalApplication",
@@ -158,12 +158,12 @@
         "description": "Aplikasi ujian online / CBT untuk sekolah & madrasah: bank soal, penilaian otomatis, analisis butir soal, dan mode ujian anti-curang.",
         "inLanguage": "id",
         "offers": {
-            "@type": "Offer",
+            "@@type": "Offer",
             "price": "{{ (int) $price }}",
             "priceCurrency": "IDR"
         },
         "publisher": {
-            "@type": "Organization",
+            "@@type": "Organization",
             "name": "SITARA",
             "url": "{{ url('/') }}",
             "logo": "{{ asset('assets/logo.png') }}"
@@ -172,8 +172,8 @@
     </script>
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
+        "@@context": "https://schema.org",
+        "@@type": "FAQPage",
         "mainEntity": [
             @php $seoFaqs = [
                 ['Bagaimana siswa masuk ke sistem?','Siswa login menggunakan NIS dan kata sandi yang diberikan oleh sekolah.'],
@@ -185,9 +185,9 @@
             ]; @endphp
             @foreach($seoFaqs as $i => $q)
             {
-                "@type": "Question",
+                "@@type": "Question",
                 "name": {!! json_encode($q[0]) !!},
-                "acceptedAnswer": { "@type": "Answer", "text": {!! json_encode($q[1]) !!} }
+                "acceptedAnswer": { "@@type": "Answer", "text": {!! json_encode($q[1]) !!} }
             }@if(! $loop->last),@endif
             @endforeach
         ]
