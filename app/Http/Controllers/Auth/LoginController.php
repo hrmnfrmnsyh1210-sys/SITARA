@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\LoginHistory;
 use App\Models\Student;
 use App\Models\User;
@@ -74,11 +75,17 @@ class LoginController extends Controller
             'logged_in_at' => now(),
         ]);
 
+        ActivityLog::record('Masuk', $user->name);
+
         return redirect()->intended(route($user->dashboardRoute()));
     }
 
     public function logout(Request $request)
     {
+        if ($user = Auth::user()) {
+            ActivityLog::record('Keluar', $user->name);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

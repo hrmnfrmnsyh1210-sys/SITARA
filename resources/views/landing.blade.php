@@ -3,8 +3,31 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SITARA · Sistem Tes Akademik Terpadu</title>
-    <meta name="description" content="Platform ujian sekolah berbasis web yang modern, aman, dan mudah digunakan.">
+
+    {{-- ============ SEO ============ --}}
+    <title>SITARA — Aplikasi Ujian Online Sekolah & Madrasah (CBT) Berbasis Web</title>
+    <meta name="description" content="SITARA (Sistem Tes Akademik Terpadu) adalah aplikasi ujian online / CBT untuk sekolah & madrasah: bank soal, penilaian otomatis, analisis butir soal, dan mode ujian anti-curang. Coba sekarang.">
+    <meta name="keywords" content="aplikasi ujian online, ujian online sekolah, CBT sekolah, computer based test, aplikasi ujian madrasah, bank soal online, ujian berbasis komputer, penilaian otomatis, SITARA">
+    <meta name="author" content="SITARA">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="{{ url('/') }}">
+
+    {{-- Open Graph (Facebook, WhatsApp, LinkedIn) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SITARA">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:title" content="SITARA — Aplikasi Ujian Online Sekolah & Madrasah (CBT)">
+    <meta property="og:description" content="Aplikasi ujian online / CBT untuk sekolah & madrasah: bank soal, penilaian otomatis, analisis butir soal, dan mode ujian anti-curang.">
+    <meta property="og:image" content="{{ asset('assets/maskot5.png') }}">
+    <meta property="og:image:alt" content="SITARA — Sistem Tes Akademik Terpadu">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SITARA — Aplikasi Ujian Online Sekolah & Madrasah (CBT)">
+    <meta name="twitter:description" content="Aplikasi ujian online / CBT untuk sekolah & madrasah: bank soal, penilaian otomatis, dan mode ujian anti-curang.">
+    <meta name="twitter:image" content="{{ asset('assets/maskot5.png') }}">
+
     <link rel="icon" type="image/png" href="{{ asset('assets/logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -119,6 +142,57 @@
             .section { padding: 3.5rem 0; }
         }
     </style>
+
+    {{-- ============ Structured Data (JSON-LD) ============ --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SITARA",
+        "alternateName": "Sistem Tes Akademik Terpadu",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "url": "{{ url('/') }}",
+        "logo": "{{ asset('assets/logo.png') }}",
+        "image": "{{ asset('assets/maskot5.png') }}",
+        "description": "Aplikasi ujian online / CBT untuk sekolah & madrasah: bank soal, penilaian otomatis, analisis butir soal, dan mode ujian anti-curang.",
+        "inLanguage": "id",
+        "offers": {
+            "@type": "Offer",
+            "price": "{{ (int) $price }}",
+            "priceCurrency": "IDR"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "SITARA",
+            "url": "{{ url('/') }}",
+            "logo": "{{ asset('assets/logo.png') }}"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            @php $seoFaqs = [
+                ['Bagaimana siswa masuk ke sistem?','Siswa login menggunakan NIS dan kata sandi yang diberikan oleh sekolah.'],
+                ['Apakah jawaban hilang jika internet terputus?','Tidak. Setiap jawaban disimpan otomatis sehingga siswa dapat melanjutkan ujian.'],
+                ['Apakah mendukung soal essay?','Ya. SITARA mendukung pilihan ganda, benar/salah, menjodohkan, isian singkat, essay, dan unggah file.'],
+                ['Apakah bisa untuk banyak sekolah?','Ya, SITARA dirancang multi-tenant sehingga satu sistem dapat melayani banyak sekolah.'],
+                ['Bagaimana sistem langganannya?','Langganan dihitung per sekolah per bulan dengan semua fitur termasuk, tanpa biaya per siswa.'],
+                ['Apa yang terjadi jika langganan berakhir?','Data sekolah tetap aman. Akses ujian dijeda sementara hingga langganan diperpanjang.'],
+            ]; @endphp
+            @foreach($seoFaqs as $i => $q)
+            {
+                "@type": "Question",
+                "name": {!! json_encode($q[0]) !!},
+                "acceptedAnswer": { "@type": "Answer", "text": {!! json_encode($q[1]) !!} }
+            }@if(! $loop->last),@endif
+            @endforeach
+        ]
+    }
+    </script>
 </head>
 <body>
 {{-- Navbar --}}

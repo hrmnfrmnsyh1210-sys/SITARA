@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /login
+Disallow: /superadmin/
+Disallow: /admin/
+Disallow: /guru/
+Disallow: /siswa/
+Disallow: /profile
+Disallow: /password/
+
+Sitemap: https://sitara.simpeda.id/sitemap.xml
