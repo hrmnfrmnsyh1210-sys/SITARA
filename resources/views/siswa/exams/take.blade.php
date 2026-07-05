@@ -70,6 +70,11 @@
         .cheat-flash{ position:fixed; inset:0; background:rgba(239,68,68,.35); z-index:3000; pointer-events:none; opacity:0; }
         .cheat-flash.show{ animation: sitara-cheat-flash .6s ease; }
         @keyframes sitara-cheat-flash{ 0%,100%{opacity:0;} 30%{opacity:1;} }
+        /* iOS: sound can't beat the silent switch, so the flash is the primary alarm —
+           make it louder-looking (near-opaque red) and let it pulse the whole time away. */
+        .cheat-flash.ios-strong{ background:rgba(220,38,38,.8); }
+        .cheat-flash.ios-strong.show{ animation: sitara-cheat-flash-strong .8s ease infinite; }
+        @keyframes sitara-cheat-flash-strong{ 0%,100%{opacity:.35;} 50%{opacity:1;} }
 
         @media (prefers-reduced-motion: reduce){
             .question-pane.q-anim,.option-card.just-picked,.cbt-question-nav button.just-answered,
@@ -354,6 +359,10 @@ const WARN_GAIN_MAX   = 4.0;   // ceiling — pushes hard so a low (not muted) v
 const WARN_RAMP_SEC   = 6;     // seconds to climb from start to max
 let actx = null, warnGain = null, audioPrimed = false;
 
+// iOS/iPadOS detection (incl. iPad on iPadOS 13+ that reports as Mac with touch).
+const IS_IOS = /iP(hone|od|ad)/.test(navigator.platform)
+    || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+
 // Browsers block audio until a user gesture — unlock & wire the graph on first interaction.
 function primeAudio() {
     if (audioPrimed) return;
@@ -370,6 +379,26 @@ function primeAudio() {
 document.addEventListener('click', primeAudio);
 document.addEventListener('keydown', primeAudio);
 
+// Synthesized beep via the Web Audio API (OscillatorNode). Unlike an <audio>/mp3
+// element, a generated tone has a much better chance of playing through iOS's
+// silent switch — so this is the audible fallback we lean on for iPhone.
+function beep() {
+    if (!actx) return;
+    try {
+        if (actx.state === 'suspended') actx.resume();
+        const osc = actx.createOscillator();
+        const g = actx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 880;                 // sharp, attention-grabbing pitch
+        const t = actx.currentTime;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.9, t + 0.02);   // quick attack
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35); // short decay
+        osc.connect(g); g.connect(actx.destination);
+        osc.start(t); osc.stop(t + 0.36);
+    } catch (e) {}
+}
+
 // Volume-independent alarms: vibration + repeating screen flash. These keep
 // alerting the student even when the phone's media volume is turned all the way
 // down, which no audio API can override.
@@ -378,6 +407,9 @@ function startVolumeProofAlarm() {
     stopVolumeProofAlarm();
     const pulse = () => {
         flashScreen();
+        // iOS only: mp3 gets muted by the silent switch, so fall back to a synthesized
+        // tone. Android keeps using warning.mp3 alone (played in playWarning()).
+        if (IS_IOS) beep();
         // Android fires vibration regardless of volume; iOS Safari ignores it (no-op).
         try { if (navigator.vibrate) navigator.vibrate([400, 200, 400]); } catch (e) {}
     };
@@ -387,6 +419,9 @@ function startVolumeProofAlarm() {
 function stopVolumeProofAlarm() {
     if (alertTimer) { clearInterval(alertTimer); alertTimer = null; }
     try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {}
+    // stop the (infinite, on iOS) flash pulse
+    const f = document.getElementById('cheatFlash');
+    if (f) f.classList.remove('show');
 }
 
 function playWarning() {
@@ -410,6 +445,7 @@ function stopWarning() {
 
 function flashScreen() {
     const f = document.getElementById('cheatFlash');
+    if (IS_IOS) f.classList.add('ios-strong');   // near-opaque, self-repeating pulse
     f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
 }
 
@@ -461,11 +497,15 @@ window.addEventListener('focus', () => { if (!document.hidden) returnedToExam();
    ============================================================ */
 window.addEventListener('load', () => {
     updateProgress();
+    // On iPhone/iPad the silent switch can mute the alarm — remind the student to disable it.
+    const iosNote = IS_IOS
+        ? '<br><br>📱 <b>Pengguna iPhone/iPad:</b> matikan <b>mode senyap</b> (silent switch) dan <b>naikkan volume</b> agar peringatan suara terdengar.'
+        : '';
     Swal.fire({
         title: 'Semangat, ' + STUDENT + '! 🦉',
         html: '<p class="sitara-swal-text">Kerjakan dengan tenang, teliti, dan <b>jujur</b>.<br>' +
               'Jangan berpindah tab atau keluar dari halaman ini — sistem <b>memantau, mencatat, &amp; melaporkan</b> ' +
-              'aktivitasmu ke guru, dan akan <b>berbunyi peringatan</b> bila kamu keluar.<br><br>' +
+              'aktivitasmu ke guru, dan akan <b>berbunyi peringatan</b> bila kamu keluar.' + iosNote + '<br><br>' +
               '<b>Jangan mencontek ya, kamu pasti bisa!</b> 💪</p>',
         imageUrl: EXAM_MASCOT, imageWidth: 150, imageAlt: 'SITARA',
         allowOutsideClick: false, buttonsStyling: false,
