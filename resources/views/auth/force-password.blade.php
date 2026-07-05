@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sitara.css') }}?v={{ filemtime(public_path('css/sitara.css')) }}" rel="stylesheet">
     <style>
         body {
             min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; margin: 0;

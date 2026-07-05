@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sitara.css') }}?v={{ filemtime(public_path('css/sitara.css')) }}" rel="stylesheet">
     @stack('styles')
 </head>
 <body class="{{ session('dark_mode') ? 'dark-mode' : '' }}">

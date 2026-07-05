@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sitara.css') }}?v={{ filemtime(public_path('css/sitara.css')) }}" rel="stylesheet">
     <style>
         body{background:#eef2f7}
         html,body{overflow-x:hidden;max-width:100%}

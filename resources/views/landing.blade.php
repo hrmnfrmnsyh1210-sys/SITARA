@@ -33,7 +33,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <link href="{{ asset('css/sitara.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sitara.css') }}?v={{ filemtime(public_path('css/sitara.css')) }}" rel="stylesheet">
     <style>
         :root { --hero-blue: #1763c9; --hero-blue-dark: #0f4ea3; --hero-mint: #2fe3a8; }
 
