@@ -31,6 +31,7 @@ class ExamScheduleController extends Controller
         $data = $this->validateData($request);
         $data['token'] = strtoupper(Str::random(6));
         $data['is_active'] = true;
+        $data['requires_location'] = $request->boolean('requires_location');
         ExamSchedule::create($data);
 
         return redirect()->route('guru.schedules.index')->with('success', 'Jadwal ujian dibuat. Token: ' . $data['token']);
@@ -46,7 +47,10 @@ class ExamScheduleController extends Controller
     public function update(Request $request, ExamSchedule $schedule)
     {
         $this->authorizeSchedule($schedule);
-        $schedule->update($this->validateData($request) + ['is_active' => $request->boolean('is_active')]);
+        $schedule->update($this->validateData($request) + [
+            'is_active' => $request->boolean('is_active'),
+            'requires_location' => $request->boolean('requires_location'),
+        ]);
 
         return redirect()->route('guru.schedules.index')->with('success', 'Jadwal diperbarui.');
     }

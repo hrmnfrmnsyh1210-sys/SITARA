@@ -16,6 +16,13 @@
             <div class="col-md-4"><label class="form-label">Ruang Ujian</label><select name="room_id" class="form-select"><option value="">— Tanpa ruang —</option>@foreach($rooms as $r)<option value="{{ $r->id }}" @selected(old('room_id',$schedule->room_id)==$r->id)>{{ $r->name }}</option>@endforeach</select></div>
             <div class="col-md-4"><label class="form-label">Waktu Mulai <span class="text-danger">*</span></label><input type="datetime-local" name="start_time" value="{{ old('start_time',$schedule->start_time?->format('Y-m-d\TH:i')) }}" class="form-control" required></div>
             <div class="col-md-4"><label class="form-label">Waktu Selesai <span class="text-danger">*</span></label><input type="datetime-local" name="end_time" value="{{ old('end_time',$schedule->end_time?->format('Y-m-d\TH:i')) }}" class="form-control" required></div>
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input type="checkbox" name="requires_location" value="1" class="form-check-input" id="reqloc" @checked(old('requires_location', $schedule->requires_location))>
+                    <label class="form-check-label" for="reqloc">Wajib kirim lokasi</label>
+                </div>
+                <div class="form-text"><i class="bi bi-geo-alt me-1"></i>Siswa harus mengizinkan akses lokasi dan mengirim koordinatnya sebelum bisa memulai ujian. Koordinat disimpan sebagai bukti, tidak dipakai untuk memblokir berdasarkan jarak.</div>
+            </div>
             @if($schedule->exists)
             <div class="col-12"><div class="form-check form-switch"><input type="checkbox" name="is_active" value="1" class="form-check-input" id="act" @checked($schedule->is_active)><label class="form-check-label" for="act">Jadwal aktif</label></div></div>
             @endif

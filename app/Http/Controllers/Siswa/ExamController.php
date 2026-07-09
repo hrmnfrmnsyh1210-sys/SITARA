@@ -58,7 +58,26 @@ class ExamController extends Controller
 
         $exam = $schedule->exam()->with('examPackage.questions')->first();
 
-        $result = DB::transaction(function () use ($schedule, $student, $exam) {
+        $existing = ExamResult::where('exam_schedule_id', $schedule->id)
+            ->where('student_id', $student->id)->first();
+
+        // Lokasi hanya diminta sekali: saat attempt pertama, atau saat melanjutkan
+        // attempt lama yang belum sempat merekam lokasi.
+        $location = null;
+        if ($this->needsLocation($schedule, $existing)) {
+            $location = $this->validateLocation($request);
+
+            // Tanpa lokasi yang valid, ujian tidak boleh dimulai.
+            if (! $location) {
+                return redirect()->route('siswa.exams.confirm', $schedule)->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Lokasi Harus Dikirim',
+                    'text' => 'Anda wajib mengirimkan lokasi terlebih dahulu sebelum memulai ujian ini. Aktifkan GPS dan izinkan akses lokasi pada browser Anda.',
+                ]);
+            }
+        }
+
+        DB::transaction(function () use ($schedule, $student, $exam, $location) {
             $result = ExamResult::firstOrNew([
                 'exam_schedule_id' => $schedule->id,
                 'student_id' => $student->id,
@@ -75,10 +94,14 @@ class ExamController extends Controller
                     'question_order' => $questionIds,
                     'remaining_seconds' => $exam->duration_minutes * 60,
                     'ip_address' => request()->ip(),
-                ])->save();
+                ]);
             }
 
-            return $result;
+            if ($location) {
+                $result->fill($location + ['location_captured_at' => now()]);
+            }
+
+            $result->save();
         });
 
         return redirect()->route('siswa.exams.take', $schedule);
@@ -94,6 +117,16 @@ class ExamController extends Controller
 
         if (in_array($result->status, ['submitted', 'graded'])) {
             return redirect()->route('siswa.results.show', $result);
+        }
+
+        // Attempt lama yang belum punya lokasi (mis. guru baru mengaktifkan syarat ini
+        // setelah ujian dimulai) dipaksa kembali ke halaman konfirmasi.
+        if ($this->needsLocation($schedule, $result)) {
+            return redirect()->route('siswa.exams.confirm', $schedule)->with('swal', [
+                'icon' => 'warning',
+                'title' => 'Lokasi Belum Dikirim',
+                'text' => 'Ujian ini mewajibkan pengiriman lokasi. Kirim lokasi Anda terlebih dahulu untuk melanjutkan.',
+            ]);
         }
 
         $exam = $schedule->exam;
@@ -202,6 +235,38 @@ class ExamController extends Controller
     private function student()
     {
         return auth()->user()->student;
+    }
+
+    /** Jadwal mewajibkan lokasi dan attempt ini belum merekamnya. */
+    private function needsLocation(ExamSchedule $schedule, ?ExamResult $result): bool
+    {
+        return $schedule->requires_location && ! ($result?->hasLocation() ?? false);
+    }
+
+    /**
+     * Koordinat datang dari browser siswa, jadi tidak bisa dipercaya sepenuhnya —
+     * yang dijamin di sini hanya bentuknya valid dan benar-benar terkirim.
+     * Mengembalikan null kalau lokasi tidak ada / tidak valid.
+     */
+    private function validateLocation(Request $request): ?array
+    {
+        $validator = validator($request->all(), [
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'location_accuracy' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+        ]);
+
+        if ($validator->fails()) {
+            return null;
+        }
+
+        $data = $validator->validated();
+
+        return [
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude'],
+            'location_accuracy' => isset($data['location_accuracy']) ? (int) round($data['location_accuracy']) : null,
+        ];
     }
 
     private function guardAccess(ExamSchedule $schedule, $student): void

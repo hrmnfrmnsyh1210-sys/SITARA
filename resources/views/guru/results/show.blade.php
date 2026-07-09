@@ -21,6 +21,26 @@
     @if(($result->violation_count ?? 0) > 0)
         <div class="alert alert-warning mt-3 mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i>Siswa terdeteksi <b>keluar dari halaman ujian {{ $result->violation_count }} kali</b> (indikasi kemungkinan mencontek).</div>
     @endif
+
+    @if($result->hasLocation())
+        <div class="alert alert-light mt-3 mb-0 small d-flex justify-content-between align-items-center gap-2">
+            <span>
+                <i class="bi bi-geo-alt-fill me-1 text-primary"></i>
+                Lokasi saat memulai: <b>{{ $result->latitude }}, {{ $result->longitude }}</b>
+                @if($result->location_accuracy)
+                    <span class="text-muted">(akurasi ±{{ $result->location_accuracy }} m)</span>
+                @endif
+                @if($result->location_captured_at)
+                    <span class="text-muted">— {{ $result->location_captured_at->format('d/m/Y H:i') }}</span>
+                @endif
+            </span>
+            <a href="{{ $result->mapsUrl() }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary flex-shrink-0">
+                <i class="bi bi-map me-1"></i>Lihat Peta
+            </a>
+        </div>
+    @elseif($result->examSchedule?->requires_location)
+        <div class="alert alert-secondary mt-3 mb-0 small"><i class="bi bi-geo-alt me-1"></i>Lokasi tidak terekam (ujian dimulai sebelum syarat lokasi diaktifkan).</div>
+    @endif
 </div></div>
 
 <form method="POST" action="{{ route('guru.results.grade',$result) }}">

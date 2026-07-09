@@ -13,12 +13,14 @@ class ExamSchedule extends Model
 
     protected $fillable = [
         'exam_id', 'classroom_id', 'room_id', 'start_time', 'end_time', 'token', 'is_active',
+        'requires_location',
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'is_active' => 'boolean',
+        'requires_location' => 'boolean',
     ];
 
     public function exam(): BelongsTo
